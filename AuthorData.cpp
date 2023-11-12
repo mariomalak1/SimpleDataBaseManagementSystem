@@ -2,8 +2,10 @@
 #define SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORDATA_H
 
 using namespace std;
+#include "FileError.cpp"
 #include <iostream>
 #include <cstring>
+#include <fstream>
 
 class Author{
 private:
@@ -56,7 +58,24 @@ public:
 class AuthorData {
 private:
     string FileName;
+    bool static isValidFile(string fileName);
+public:
+    AuthorData(string filename){
+        if (isValidFile(filename)){
+            this->FileName = filename;
+        }else{
+            throw (FileError("Can't open file with name : " + filename));
+        }
+    }
 };
 
+bool AuthorData::isValidFile(string fileName) {
+    fstream file;
+    file.open(fileName);
+    if (file.good()){
+        return true;
+    }
+    return false;
+}
 
 #endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORDATA_H
