@@ -28,11 +28,9 @@ private:
 
     static void redirectToAction(string response){
         if (response == "1"){
-            cout << "1" << endl;
             // add new author
         }
         else if (response == "2"){
-            cout << "2" << endl;
             // add new book
         }
         else if (response == "3"){

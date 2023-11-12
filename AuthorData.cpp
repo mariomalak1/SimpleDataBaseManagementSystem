@@ -50,32 +50,45 @@ public:
     }
 
     friend ostream& operator << (ostream &out, Author author){
-        cout << "Author Data: ID -> " << author.getID() <<", Name -> " << author.getName() << ", Address -> " << author.getAddress();
-        return cout;
+        out << "Author Data: ID -> " << author.getID() <<", Name -> " << author.getName() << ", Address -> " << author.getAddress();
+        return out;
+    }
+
+    friend fstream& operator << (fstream &file, Author author){
+        int length = ((author.getID().length()) + (author.getName().length()) + (author.getAddress().length()));
+        file << length << author.getName() << "|" << author.getID() << "|" << author.getAddress() << "\n";
+        return file;
     }
 };
 
 class AuthorData {
 private:
-    string FileName;
-    bool static isValidFile(string fileName);
+    const string FileName = "Author.txt";
 public:
-    AuthorData(string filename){
-        if (isValidFile(filename)){
-            this->FileName = filename;
-        }else{
-            throw (FileError("Can't open file with name : " + filename));
+    AuthorData(){
+        fstream File;
+        File.open(FileName, ios::app|ios::out|ios::in);
+        if (!File.good()){
+            throw (FileError("Can't open file with name : " + this->FileName));
         }
     }
+
+    void printFileContent(){
+        fstream file_;
+        file_.open(FileName, ios::app|ios::out|ios::in);
+        cout << file_.rdbuf() << endl;
+    }
+
+    bool AddAuthor(const Author & author);
 };
 
-bool AuthorData::isValidFile(string fileName) {
+bool AuthorData::AddAuthor(const Author & author) {
     fstream file;
-    file.open(fileName);
-    if (file.good()){
-        return true;
-    }
-    return false;
+    file.open(FileName, ios::app);
+    file << author;
+    file.close();
+    return true;
 }
+
 
 #endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORDATA_H
