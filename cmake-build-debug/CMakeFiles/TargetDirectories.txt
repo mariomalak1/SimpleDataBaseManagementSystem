@@ -1,0 +1,3 @@
+D:/FCAI-CU/Third Year/First Semester/File Managment/Assignments/Assignment 1/SimpleDataBaseManagementSystem/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+D:/FCAI-CU/Third Year/First Semester/File Managment/Assignments/Assignment 1/SimpleDataBaseManagementSystem/cmake-build-debug/CMakeFiles/SimpleDataBaseManagementSystem_.dir
+D:/FCAI-CU/Third Year/First Semester/File Managment/Assignments/Assignment 1/SimpleDataBaseManagementSystem/cmake-build-debug/CMakeFiles/edit_cache.dir
