@@ -1,22 +1,6 @@
-#include <iostream>
-#include "AuthorData.cpp"
-#include "BookData.cpp"
-#include <cstring>
+#include "Application.cpp"
 
 int main() {
-    Author mario("ID", "Name", "Address");
-    cout << mario << endl;
-
-    mario.setAddress("Address2");
-    cout << mario.getAddress() << endl;
-
-    mario.setName("Name2");
-    cout << mario.getName() << endl;
-
-    mario.setID("ID2");
-    cout << mario.getID() << endl;
-
-    cout << mario << endl;
-
+    Application::run();
     return 0;
 }
