@@ -55,7 +55,8 @@ public:
     }
 
     friend fstream& operator << (fstream &file, Author author){
-        int length = ((author.getID().length()) + (author.getName().length()) + (author.getAddress().length()));
+        // length indicator is about all length of fields + 3 delimiters
+        int length = ((author.getID().length()) + (author.getName().length()) + (author.getAddress().length())) + 3;
         file << length << author.getName() << "|" << author.getID() << "|" << author.getAddress() << "|";
         return file;
     }
@@ -90,14 +91,17 @@ private:
             name += record[i];
             i++;
         }
-        cout << "from split -> name : " << name << endl;
+
+        i++;
+
         // fill id string
         string id;
         while (i < record.length() && record[i] != '|'){
             id += record[i];
             i++;
         }
-        cout << "from split -> id : " << id << endl;
+
+        i++;
 
         // fill address string
         string address;
@@ -105,7 +109,6 @@ private:
             address += record[i];
             i++;
         }
-        cout << "from split -> address : " << address << endl;
 
         author.setName(const_cast<char *>(name.c_str()));
         author.setID(const_cast<char *>(id.c_str()));
@@ -135,12 +138,16 @@ public:
         fstream f;
         f.open(FileName, ios::in);
         f.seekg(index);
+
         // read (length indicator) first
         int recordLength = readLengthIndicator(index);
 
+        // read the hole record
         string record = readAuthorRecord(recordLength, index + to_string(recordLength).length());
 
+        // split the record and put in author object
         splitRecordIntoAuthor(author, record);
+
         return author;
     }
 };
