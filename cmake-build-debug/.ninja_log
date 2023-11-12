@@ -1,3 +1,7 @@
 # ninja log v5
 4	400	7214962178123484	CMakeFiles/SimpleDataBaseManagementSystem_.dir/main.cpp.obj	bb751bd0411fc471
 401	520	7214962179254870	SimpleDataBaseManagementSystem_.exe	842c378a3145705b
+2	709	7215057743696657	CMakeFiles/SimpleDataBaseManagementSystem_.dir/main.cpp.obj	4654e1060373db49
+709	984	7215057746236164	SimpleDataBaseManagementSystem_.exe	842c378a3145705b
+2	728	7215064919066750	CMakeFiles/SimpleDataBaseManagementSystem_.dir/main.cpp.obj	4654e1060373db49
+729	904	7215064920756410	SimpleDataBaseManagementSystem_.exe	842c378a3145705b
