@@ -56,17 +56,7 @@ public:
 class AuthorData {
 private:
     string FileName;
-public:
-    void mario();
 };
 
 
 #endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORDATA_H
-
-
-using namespace std;
-
-void AuthorData::mario() {
-    cout << "mario" << endl;
-    cout << this << endl;
-}
