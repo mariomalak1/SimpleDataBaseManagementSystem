@@ -56,7 +56,7 @@ public:
 
     friend fstream& operator << (fstream &file, Author author){
         int length = ((author.getID().length()) + (author.getName().length()) + (author.getAddress().length()));
-        file << length << author.getName() << "|" << author.getID() << "|" << author.getAddress() << "\n";
+        file << length << author.getName() << "|" << author.getID() << "|" << author.getAddress() << "|";
         return file;
     }
 };
@@ -64,6 +64,54 @@ public:
 class AuthorData {
 private:
     const string FileName = "Author.txt";
+
+    int readLengthIndicator(int index = 0);
+
+    string readAuthorRecord(int recordLength, int indexAfterIndicator) {
+        fstream f;
+        f.open(FileName, ios::in);
+        f.seekg(indexAfterIndicator);
+        char * record = new char[recordLength];
+        f.read(record, recordLength);
+        return record;
+    }
+
+    void splitRecordIntoAuthor(Author & author, string record){
+        int i = 0;
+
+        // if the record length is less than the default will throw error
+        if (record.length() <= 1) {
+            throw ReadRecordError();
+        }
+
+        // fill name string
+        string name = "";
+        while (i < record.length() && record[i] != '|'){
+            name += record[i];
+            i++;
+        }
+        cout << "from split -> name : " << name << endl;
+        // fill id string
+        string id;
+        while (i < record.length() && record[i] != '|'){
+            id += record[i];
+            i++;
+        }
+        cout << "from split -> id : " << id << endl;
+
+        // fill address string
+        string address;
+        while (i < record.length() && record[i] != '|'){
+            address += record[i];
+            i++;
+        }
+        cout << "from split -> address : " << address << endl;
+
+        author.setName(const_cast<char *>(name.c_str()));
+        author.setID(const_cast<char *>(id.c_str()));
+        author.setAddress(const_cast<char *>(address.c_str()));
+    }
+
 public:
     AuthorData(){
         fstream File;
@@ -80,6 +128,21 @@ public:
     }
 
     bool AddAuthor(const Author & author);
+
+    Author readAuthor(int index = 0){
+        Author author = Author("", "", "");
+
+        fstream f;
+        f.open(FileName, ios::in);
+        f.seekg(index);
+        // read (length indicator) first
+        int recordLength = readLengthIndicator(index);
+
+        string record = readAuthorRecord(recordLength, index + to_string(recordLength).length());
+
+        splitRecordIntoAuthor(author, record);
+        return author;
+    }
 };
 
 bool AuthorData::AddAuthor(const Author & author) {
@@ -88,6 +151,32 @@ bool AuthorData::AddAuthor(const Author & author) {
     file << author;
     file.close();
     return true;
+}
+
+int AuthorData::readLengthIndicator(int index) {
+    fstream f;
+    f.open(FileName, ios::in);
+    f.seekg(index);
+
+    string lengthIndicator = "";
+    char ch;
+    while (!f.eof() && ch != '|'){
+        f >> ch;
+        // check that the character is between 0 and 9
+        if (ch >= 48 && ch <= 57){
+            lengthIndicator += ch;
+        }else{
+            break;
+        }
+    }
+    int length = 0;
+    try {
+        length = stoi(lengthIndicator);
+    }
+    catch (...){
+        throw LengthIndicatorError();
+    }
+    return length;
 }
 
 

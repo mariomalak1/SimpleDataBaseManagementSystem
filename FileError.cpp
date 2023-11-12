@@ -21,3 +21,32 @@ public:
         errorMessage = "Can't open this file";
     }
 };
+
+class LengthIndicatorError{
+private:
+    string errorMessage;
+public:
+    LengthIndicatorError(string errorMassage){
+        errorMassage = errorMassage;
+    }
+
+    void pushError(){
+        cerr << errorMessage << endl;
+    }
+
+    LengthIndicatorError(){
+        errorMessage = "Length Indicator is not valid";
+    }
+};
+
+class ReadRecordError{
+private:
+    string errorMessage;
+public:
+    void pushError(){
+        cerr << errorMessage << endl;
+    }
+    ReadRecordError(){
+        errorMessage = "Error while reading record.";
+    }
+};
