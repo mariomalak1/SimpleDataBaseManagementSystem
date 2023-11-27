@@ -12,6 +12,11 @@ private:
     char ID [15];
     char Name [30];
     char Address [30];
+    Author(){
+        this->setID("No ID");
+        this->setAddress("No Address");
+        this->setName("No Name");
+    }
 public:
     Author(const char *id, const char *name, const char *address){
         strcpy(ID, id);
@@ -24,7 +29,46 @@ public:
         strcpy_s(Name, name.c_str());
         strcpy_s(Address, address.c_str());
     }
+    
+    Author(Author const &au){
+        int length = sizeof(au.ID)/sizeof(char);
+        for (int i = 0; i < length; ++i) {
+            this->ID[i] = au.ID[i];
+        }
 
+        length = sizeof (au.Address)/sizeof (char);
+
+        for (int i = 0; i < length; ++i) {
+            this->Address[i] = au.Address[i];
+        }
+
+        length = sizeof (au.Name)/sizeof (char);
+        for (int i = 0; i < length; ++i) {
+            this->Name[i] = au.Name[i];
+        }
+    }
+
+    Author& operator=(const Author &au) {
+        int length = sizeof(au.ID)/sizeof(char);
+
+        for (int i = 0; i < length; ++i) {
+            this->ID[i] = au.ID[i];
+        }
+
+        length = sizeof (au.Address)/sizeof (char);
+
+        for (int i = 0; i < length; ++i) {
+            this->Address[i] = au.Address[i];
+        }
+
+        length = sizeof (au.Name)/sizeof (char);
+
+        for (int i = 0; i < length; ++i) {
+            this->Name[i] = au.Name[i];
+        }
+        return *this;
+    }
+    
     void setID(char * Id){
         strcpy(ID,Id);
     }
@@ -64,20 +108,22 @@ public:
 
 class AuthorData {
 private:
-    const string FileName = "Author.txt";
+    static const string FileName;
 
-    int readLengthIndicator(int index = 0);
+    static int readLengthIndicator(int index = 0);
 
-    string readAuthorRecord(int recordLength, int indexAfterIndicator) {
+    static string readAuthorRecord(int recordLength, int indexAfterIndicator) {
         fstream f;
         f.open(FileName, ios::in);
-        f.seekg(indexAfterIndicator);
+
+        f.seekg(indexAfterIndicator, ios::beg);
+
         char * record = new char[recordLength];
         f.read(record, recordLength);
         return record;
     }
 
-    void splitRecordIntoAuthor(Author & author, string record){
+    static void splitRecordIntoAuthor(Author & author, string record){
         int i = 0;
 
         // if the record length is less than the default will throw error
@@ -137,8 +183,17 @@ public:
 
         fstream f;
         f.open(FileName, ios::in);
-        f.seekg(index);
 
+        // check first if the index is right or not, if the index is wrong will throw an exception
+        f.seekg(0, ios::end);
+        int fileSize = f.tellg();
+
+        if (fileSize <= index){
+            throw new WrongOffsetError();
+        }
+
+        // will go to the index location
+        f.seekg(index, ios::beg);
         // read (length indicator) first
         int recordLength = readLengthIndicator(index);
 
@@ -149,6 +204,48 @@ public:
         splitRecordIntoAuthor(author, record);
 
         return author;
+    }
+
+    static Author * linear_search_ID(string id){
+        int offset = 0;
+
+        Author author("No ID", "No Name", "No Address");
+
+        while (true){
+            try{
+                fstream f;
+                f.open(FileName, ios::in);
+                f.seekg(offset, ios::beg);
+
+
+                // read (length indicator) first
+                int recordLength = readLengthIndicator(offset);
+
+                // read the hole record
+                string record = readAuthorRecord(recordLength, offset + to_string(recordLength).length());
+
+                // split the record and put in author object
+                splitRecordIntoAuthor(author, record);
+
+                if (author.getID() == id){
+                    return new Author(author);
+                }
+
+                else {
+                    offset += recordLength + to_string(recordLength).length();
+                    f.seekg(0, ios::end);
+
+                    if (f.tellg() == offset){
+                        return nullptr;
+                    }
+                }
+            }
+            catch(...){
+                cerr << "Error Happen While Search in Authors";
+                break;
+            }
+        }
+        return nullptr;
     }
 };
 
@@ -163,7 +260,8 @@ bool AuthorData::AddAuthor(const Author & author) {
 int AuthorData::readLengthIndicator(int index) {
     fstream f;
     f.open(FileName, ios::in);
-    f.seekg(index);
+
+    f.seekg(index, ios::beg);
 
     string lengthIndicator = "";
     char ch;
@@ -176,7 +274,7 @@ int AuthorData::readLengthIndicator(int index) {
             break;
         }
     }
-    int length = 0;
+    int length;
     try {
         length = stoi(lengthIndicator);
     }
@@ -186,5 +284,6 @@ int AuthorData::readLengthIndicator(int index) {
     return length;
 }
 
+const string AuthorData::FileName = "Author.txt";
 
 #endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORDATA_H
