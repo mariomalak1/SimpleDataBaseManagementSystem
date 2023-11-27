@@ -2,16 +2,49 @@
 #define SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORDATA_H
 
 using namespace std;
+
+// files we create
 #include "FileError.cpp"
+
+// some needed algorithms
+#include <algorithm>
+
+// some needed data structure
+#include <vector>
+#include <map>
+
+// this imports for date and time and to manipulate it
 #include <iostream>
 #include <cstring>
 #include <fstream>
 
+struct AuthorHeader{
+    static const int NUM_RECORDS_SIZE = 5;
+    static const int DATE_TIME_SIZE = 19;
+    static const int AVAIL_LIST_SIZE = 6;
+
+    char numRecords [NUM_RECORDS_SIZE];
+    char lastUpdated[DATE_TIME_SIZE]; // date and time
+    char availList[AVAIL_LIST_SIZE];
+    void readHeaderRecord(){
+
+    }
+    void updateHeaderRecord(){
+
+    }
+    int HeaderLength(){
+        return (NUM_RECORDS_SIZE + DATE_TIME_SIZE + AVAIL_LIST_SIZE);
+    }
+};
+
 class Author{
+public:
+    static const int SIZE = 30;
+    static const int SIZE_ID = 15;
 private:
-    char ID [15];
-    char Name [30];
-    char Address [30];
+    char ID [SIZE_ID];
+    char Name [SIZE];
+    char Address [SIZE];
     Author(){
         this->setID("No ID");
         this->setAddress("No Address");
@@ -29,7 +62,7 @@ public:
         strcpy_s(Name, name.c_str());
         strcpy_s(Address, address.c_str());
     }
-    
+
     Author(Author const &au){
         int length = sizeof(au.ID)/sizeof(char);
         for (int i = 0; i < length; ++i) {
@@ -68,7 +101,7 @@ public:
         }
         return *this;
     }
-    
+
     void setID(char * Id){
         strcpy(ID,Id);
     }
@@ -109,58 +142,96 @@ public:
 class AuthorData {
 private:
     static const string FileName;
+    static Author getAuthorDataFromUser(){
+        // try to get valid data from user
+        // throw error if anything went wrong
+        // else return author
+        return Author("", "", "");
+    }
+    void loadIndexInMemory(){
 
-    static int readLengthIndicator(int index = 0);
+    }
 
-    static string readAuthorRecord(int recordLength, int indexAfterIndicator) {
+    // return vector of vectors were the vector hold offset number, and it's size
+    static vector<map<int, int>> putAvailListInVector(){
+        AuthorHeader header;
+        header.readHeaderRecord();
+        int availListPointer = stoi(header.availList);
+
+        vector<map<int, int>> vectorOfNodes;
+
+        // check that if avail list is empty
+
         fstream f;
-        f.open(FileName, ios::in);
+        f.open(AuthorData::getFileName(), ios::out);
+        try {
+            while (true) {
 
-        f.seekg(indexAfterIndicator, ios::beg);
+                if (availListPointer == -1) {
+                    return vectorOfNodes;
+                }
 
-        char * record = new char[recordLength];
-        f.read(record, recordLength);
-        return record;
+                char c;
+                map<int, int> map;
+                string sizeOfRecordInAvailList, nextNodePointer;
+                f.seekg(availListPointer);
+
+                // to move after *
+                f.seekg(1, ios::cur);
+
+                // to parse the next pointer record offset
+                while (true) {
+                    f.get(c);
+                    if (c >= 48 and c <= 57) {
+                        nextNodePointer += c;
+                    } else {
+                        break;
+                    }
+                }
+
+                // to move after | delimiter
+                f.seekg(1, ios::cur);
+
+                // to parse the size of record
+                while (true) {
+                    f.get(c);
+                    if (c >= 48 and c <= 57) {
+                        sizeOfRecordInAvailList += c;
+                    } else {
+                        break;
+                    }
+                }
+                int recordLength = stoi(sizeOfRecordInAvailList);
+
+                map.insert(make_pair(availListPointer, recordLength));
+
+                availListPointer = stoi(nextNodePointer);
+
+                vectorOfNodes.push_back(map);
+            }
+        }
+        catch(...){
+            cerr << "Error While showing the Avail List in putAvailListInVector, remove this statement if already done and fix the error" << endl;
+            return vectorOfNodes;
+        }
     }
 
-    static void splitRecordIntoAuthor(Author & author, string record){
-        int i = 0;
-
-        // if the record length is less than the default will throw error
-        if (record.length() <= 1) {
-            throw ReadRecordError();
-        }
-
-        // fill name string
-        string name = "";
-        while (i < record.length() && record[i] != '|'){
-            name += record[i];
-            i++;
-        }
-
-        i++;
-
-        // fill id string
-        string id;
-        while (i < record.length() && record[i] != '|'){
-            id += record[i];
-            i++;
-        }
-
-        i++;
-
-        // fill address string
-        string address;
-        while (i < record.length() && record[i] != '|'){
-            address += record[i];
-            i++;
-        }
-
-        author.setName(const_cast<char *>(name.c_str()));
-        author.setID(const_cast<char *>(id.c_str()));
-        author.setAddress(const_cast<char *>(address.c_str()));
+    static void sortAvailList(vector<map<int, int>>&vec){
+        auto comparator = [](const std::map<int, int>& a, const std::map<int, int>& b) {
+            // Comparing maps based on their first key
+            return a.begin()->first < b.begin()->first;
+        };
+        sort(vec.begin(), vec.end(), comparator);
     }
 
+    // will return the offset of the suitable record
+    static int availList(){
+        vector<map<int, int>> availListVector = putAvailListInVector();
+        sortAvailList(availListVector);
+        // this error to return to this line and continue
+        askdknaskjldnlaskmnd;
+
+    }
 public:
     AuthorData(){
         fstream File;
@@ -169,121 +240,45 @@ public:
             throw (FileError("Can't open file with name : " + this->FileName));
         }
     }
-
     void printFileContent(){
         fstream file_;
         file_.open(FileName, ios::app|ios::out|ios::in);
         cout << file_.rdbuf() << endl;
     }
+    static string getFileName(){
+        return AuthorData::FileName;
+    }
+    static bool addAuthor();
 
-    bool AddAuthor(const Author & author);
+    static Author getValidAuthorDataFromUser(){
+        char name[Author::SIZE], id[Author::SIZE_ID], Address[Author::SIZE];
 
-    Author readAuthor(int index = 0){
-        Author author = Author("", "", "");
+        cout << "Enter Author ID: ";
+        std::cin.getline(id, Author::SIZE_ID);
 
-        fstream f;
-        f.open(FileName, ios::in);
+        cout << "Enter Author Name: ";
+        std::cin.getline(name, Author::SIZE);
 
-        // check first if the index is right or not, if the index is wrong will throw an exception
-        f.seekg(0, ios::end);
-        int fileSize = f.tellg();
+        cout << "Enter Author Address: ";
+        std::cin.getline(Address, Author::SIZE);
 
-        if (fileSize <= index){
-            throw new WrongOffsetError();
-        }
-
-        // will go to the index location
-        f.seekg(index, ios::beg);
-        // read (length indicator) first
-        int recordLength = readLengthIndicator(index);
-
-        // read the hole record
-        string record = readAuthorRecord(recordLength, index + to_string(recordLength).length());
-
-        // split the record and put in author object
-        splitRecordIntoAuthor(author, record);
-
-        return author;
+        cin >> name;
+        return Author(id, name, Address);
     }
 
-    static Author * linear_search_ID(string id){
-        int offset = 0;
-
-        Author author("No ID", "No Name", "No Address");
-
-        while (true){
-            try{
-                fstream f;
-                f.open(FileName, ios::in);
-                f.seekg(offset, ios::beg);
-
-
-                // read (length indicator) first
-                int recordLength = readLengthIndicator(offset);
-
-                // read the hole record
-                string record = readAuthorRecord(recordLength, offset + to_string(recordLength).length());
-
-                // split the record and put in author object
-                splitRecordIntoAuthor(author, record);
-
-                if (author.getID() == id){
-                    return new Author(author);
-                }
-
-                else {
-                    offset += recordLength + to_string(recordLength).length();
-                    f.seekg(0, ios::end);
-
-                    if (f.tellg() == offset){
-                        return nullptr;
-                    }
-                }
-            }
-            catch(...){
-                cerr << "Error Happen While Search in Authors";
-                break;
-            }
-        }
-        return nullptr;
-    }
 };
 
-bool AuthorData::AddAuthor(const Author & author) {
-    fstream file;
-    file.open(FileName, ios::app);
-    file << author;
-    file.close();
-    return true;
+const string AuthorData::FileName = "Data\\Author.txt";
+
+bool AuthorData::addAuthor() {
+    // get the data from the user
+    Author author = getAuthorDataFromUser();
+
+    // check the avail list
+    // add in the main file !!!
+    // add in index file -> automatically sort the file again in the memory !!!
+    // ****  then go to write it in the index file !!!
+    return false;
 }
-
-int AuthorData::readLengthIndicator(int index) {
-    fstream f;
-    f.open(FileName, ios::in);
-
-    f.seekg(index, ios::beg);
-
-    string lengthIndicator = "";
-    char ch;
-    while (!f.eof() && ch != '|'){
-        f >> ch;
-        // check that the character is between 0 and 9
-        if (ch >= 48 && ch <= 57){
-            lengthIndicator += ch;
-        }else{
-            break;
-        }
-    }
-    int length;
-    try {
-        length = stoi(lengthIndicator);
-    }
-    catch (...){
-        throw LengthIndicatorError();
-    }
-    return length;
-}
-
-const string AuthorData::FileName = "Author.txt";
 
 #endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORDATA_H

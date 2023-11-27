@@ -1,4 +1,5 @@
 #include <iostream>
+#include "AuthorData.cpp"
 using namespace std;
 
 class Application{
@@ -19,16 +20,17 @@ private:
     static void getResponse(){
         while (true){
             string response;
-            cout << "What's Your Response: " << endl;
+            cout << "What's Your Response: ";
             cin >> response;
             cin.clear();
             redirectToAction(response);
+            printMenu();
         }
     }
 
     static void redirectToAction(string response){
         if (response == "1"){
-            // add new author
+            AuthorData::addAuthor();
         }
         else if (response == "2"){
             // add new book
