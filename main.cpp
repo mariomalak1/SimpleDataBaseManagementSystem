@@ -1,6 +1,8 @@
 #include "Application.cpp"
 
 int main() {
+    Application::run();
+
 //    AuthorData authorData = AuthorData();
 ////    Author author = Author("ID", "Name", "Address");
 ////    Author author2 = Author("ID2", "Name2", "Address2");
@@ -25,7 +27,6 @@ int main() {
 ////    authorData.printFileContent();
 
 
-    Application::run();
 //    // Get the current system time point
 //    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 //

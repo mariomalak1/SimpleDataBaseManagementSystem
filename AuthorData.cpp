@@ -23,7 +23,13 @@ using namespace std;
 #include <cstring>
 #include <fstream>
 
-struct AuthorHeader{
+class AuthorHeader{
+private:
+    static string formatString(int sizeToFill, char characterToFill, const string& str){
+        std::ostringstream oss;
+        oss << std::setw(sizeToFill) << std::setfill(characterToFill) << str;
+        return oss.str();
+    }
 public:
     static const int NUM_RECORDS_SIZE = 5;
     static const int DATE_TIME_SIZE = 19;
@@ -35,7 +41,7 @@ public:
 
     static void parseHeader(string header){
         // put avail list pointer
-        int i = 0, j = 0;
+        int i = 0;
         string availListPointer, update;
         while (true){
             if (header[i] >= 48 and header[i] <= 57){
@@ -48,11 +54,8 @@ public:
         }
         int number = stoi(availListPointer);
 
-        ostringstream oss;
-        oss << std::setw(6) << std::setfill('0') << number;
-
         // Copy the formatted string to the availList array
-        strncpy(availList, oss.str().c_str(), AVAIL_LIST_SIZE - 1);
+        strncpy(availList, formatString(AVAIL_LIST_SIZE - 1, '0', to_string(number)).c_str(), AVAIL_LIST_SIZE - 1);
         availList[AVAIL_LIST_SIZE - 1] = '\0';  // Ensure null-termination
 
 
@@ -84,10 +87,9 @@ public:
                 break;
             }
         }
-
         int numRecordsInFIle = stoi(numberRecords);
-        oss << std::setw(NUM_RECORDS_SIZE - 1) << std::setfill('0') << numRecordsInFIle;
-        strncpy(numRecords, oss.str().c_str(), NUM_RECORDS_SIZE - 1);
+        strncpy(numRecords, formatString(NUM_RECORDS_SIZE - 1, '0', to_string(numRecordsInFIle)).c_str(), NUM_RECORDS_SIZE - 1);
+        numberRecords[NUM_RECORDS_SIZE - 1] = '\0';
     }
     static void setUpdatedDateTime(){
         chrono::system_clock::time_point now = std::chrono::system_clock::now();
@@ -100,6 +102,7 @@ public:
         ostringstream oss;
         oss << std::put_time(localTime, "%Y-%m-%d %H:%M:%S");
         std::string formattedTime = oss.str();
+
         strncpy(lastUpdated, formattedTime.c_str(), DATE_TIME_SIZE - 1);
         lastUpdated[DATE_TIME_SIZE - 1] = '\0';  // Ensure null-termination
     }
@@ -110,35 +113,36 @@ public:
         parseHeader(header);
     }
 
-    static void updateHeaderRecord(fstream &file, int addNumberOfRecords = 0){
+    static void updateHeaderRecord(fstream &file, int addNumberOfRecords = 0, int firstUpdate = 0){
         // update date and time
         setUpdatedDateTime();
-
-        // update number of records
-        if(addNumberOfRecords){
-            int numRecords_ = stoi(numRecords);
-            numRecords_ += addNumberOfRecords;
-
-            std::ostringstream oss;
-            oss << std::setw(NUM_RECORDS_SIZE - 1) << std::setfill('0') << to_string(numRecords_);
-            std::string formattedNumber = oss.str();
-
-            strncpy(numRecords, formattedNumber.c_str(), NUM_RECORDS_SIZE - 1);
+        if (firstUpdate){
+            strncpy(numRecords, formatString(NUM_RECORDS_SIZE - 1, '0', to_string(0)).c_str(), NUM_RECORDS_SIZE - 1);
             numRecords[NUM_RECORDS_SIZE - 1] = '\0';
+            cout << numRecords << endl;
+        }else{
+            // update number of records
+            if(addNumberOfRecords){
+                int numRecords_ = stoi(numRecords);
+                numRecords_ += addNumberOfRecords;
+                strncpy(numRecords, formatString(NUM_RECORDS_SIZE - 1, '0', to_string(numRecords_)).c_str(), NUM_RECORDS_SIZE - 1);
+                numRecords[NUM_RECORDS_SIZE - 1] = '\0';
+            }
+            // put value to avail list if not found
+            strncpy(availList, to_string(-1).c_str(), AVAIL_LIST_SIZE - 1);
         }
 
-        file << availList << '|' << numRecords << '|' << lastUpdated << '|' <<'\n';
+
+        cout << availList << '|' << numRecords << '|' << lastUpdated << '|' <<'\n';
+        if (file.good()){
+            file << availList << '|' << numRecords << '|' << lastUpdated << '|' <<'\n';
+        }
     }
 
     // update avail list pointer, and number of records with -1 or 1 as the user determine
     static void updateAvailList(fstream &file, int firstOffset, int numberRecordsAdded){
-        std::ostringstream oss;
-        oss << std::setw(AVAIL_LIST_SIZE - 1) << std::setfill('0') << to_string(firstOffset);
-        std::string formattedNumber = oss.str();
-
-        strncpy(availList, formattedNumber.c_str(), AVAIL_LIST_SIZE - 1);
+        strncpy(numRecords, formatString(AVAIL_LIST_SIZE - 1, '0', to_string(firstOffset)).c_str(), AVAIL_LIST_SIZE - 1);
         availList[AVAIL_LIST_SIZE - 1] = '\0';
-
         updateHeaderRecord(file, numberRecordsAdded);
     }
 
@@ -146,6 +150,9 @@ public:
         return (NUM_RECORDS_SIZE + DATE_TIME_SIZE + AVAIL_LIST_SIZE);
     }
 };
+char AuthorHeader::availList[AuthorHeader::AVAIL_LIST_SIZE];
+char AuthorHeader::lastUpdated[AuthorHeader::DATE_TIME_SIZE];
+char AuthorHeader::numRecords[AuthorHeader::NUM_RECORDS_SIZE];
 
 class Author{
 public:
@@ -155,11 +162,6 @@ private:
     char ID [SIZE_ID];
     char Name [SIZE];
     char Address [SIZE];
-    Author(){
-        this->setID("No ID");
-        this->setAddress("No Address");
-        this->setName("No Name");
-    }
 public:
     Author(const char *id, const char *name, const char *address){
         strcpy(ID, id);
@@ -250,6 +252,7 @@ public:
 
     // return length of the record with delimiters
     int getLengthOfRecord(){
+        cout << ((this->getID().length()) + (this->getName().length()) + (this->getAddress().length())) + 3;
         return ((this->getID().length()) + (this->getName().length()) + (this->getAddress().length())) + 3;
     }
 };
@@ -351,14 +354,16 @@ private:
     static Author getValidAuthorDataFromUser(){
         char name[Author::SIZE], id[Author::SIZE_ID], Address[Author::SIZE];
 
+        cin.ignore();
+
         cout << "Enter Author ID: ";
-        std::cin.getline(id, Author::SIZE_ID);
+        cin.getline(id, Author::SIZE_ID);
 
         cout << "Enter Author Name: ";
-        std::cin.getline(name, Author::SIZE);
+        cin.getline(name, Author::SIZE);
 
         cout << "Enter Author Address: ";
-        std::cin.getline(Address, Author::SIZE);
+        cin.getline(Address, Author::SIZE);
 
         cin >> name;
         return Author(id, name, Address);
@@ -395,8 +400,10 @@ bool AuthorData::addAuthor() {
     file.seekg(0, ios::end);
     int fileEnd = file.tellg();
 
+    cout << fileEnd << "   |   " << fileBegin << (fileBegin == fileEnd) << "   |   " <<  endl;
+
     if (fileBegin == fileEnd){
-        AuthorHeader::updateHeaderRecord(file);
+        AuthorHeader::updateHeaderRecord(file, 0, 1);
     }
 
     // get the data from the user
