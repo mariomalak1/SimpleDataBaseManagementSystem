@@ -14,6 +14,12 @@ using namespace std;
 #include <map>
 
 // this imports for date and time and to manipulate it
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
+
+// imports for ios
 #include <iostream>
 #include <cstring>
 #include <fstream>
@@ -23,15 +29,80 @@ struct AuthorHeader{
     static const int DATE_TIME_SIZE = 19;
     static const int AVAIL_LIST_SIZE = 6;
 
-    char numRecords [NUM_RECORDS_SIZE];
-    char lastUpdated[DATE_TIME_SIZE]; // date and time
-    char availList[AVAIL_LIST_SIZE];
-    void readHeaderRecord(){
+    static char numRecords [NUM_RECORDS_SIZE];
+    static char lastUpdated[DATE_TIME_SIZE]; // date and time
+    static char availList[AVAIL_LIST_SIZE];
 
-    }
-    void updateHeaderRecord(){
+    static void parseHeader(string header){
+        char c;
 
+        // put avail list pointer
+        int i = 0, j = 0;
+        string availListPointer, update;
+        while (true){
+            if (header[i] >= 48 and header[i] <= 57){
+                availListPointer += header[i];
+                i++;
+            }
+            else{
+                break;
+            }
+        }
+        int number = stoi(availListPointer);
+
+        ostringstream oss;
+        oss << std::setw(6) << std::setfill('0') << number;
+
+        // Copy the formatted string to the availList array
+        strncpy(availList, oss.str().c_str(), AVAIL_LIST_SIZE - 1);
+        availList[AVAIL_LIST_SIZE - 1] = '\0';  // Ensure null-termination
+
+
+        // last updated date and time
+        i++;
+        while (true){
+            if (header[i] >= 48 and header[i] <= 57){
+                update += header[i];
+                i++;
+            }
+            else{
+                break;
+            }
+        }
+
+        strncpy(lastUpdated, update.c_str(), DATE_TIME_SIZE - 1);
+        lastUpdated[AVAIL_LIST_SIZE - 1] = '\0';
+
+
+        // number of records
+        i++;
+        string numberRecords;
+        while (true){
+            if (header[i] >= 48 and header[i] <= 57){
+                numberRecords += header[i];
+                i++;
+            }
+            else{
+                break;
+            }
+        }
+
+        int numRecordsInFIle = stoi(numberRecords);
+        oss << std::setw(5) << std::setfill('0') << numberRecords;
+        strncpy(numRecords, oss.str().c_str(), NUM_RECORDS_SIZE - 1);
     }
+
+    static void readHeaderRecord(fstream &file){
+        string header;
+        file.seekg(0, ios::beg);
+        getline(file, header);
+        parseHeader(header);
+    }
+
+    static void updateHeaderRecord(fstream &file){
+        file << availList << '|' << numRecords << '|' << lastUpdated << '|' <<'\n';
+    }
+
     int HeaderLength(){
         return (NUM_RECORDS_SIZE + DATE_TIME_SIZE + AVAIL_LIST_SIZE);
     }
@@ -137,17 +208,17 @@ public:
         file << length << author.getName() << "|" << author.getID() << "|" << author.getAddress() << "|";
         return file;
     }
+
+    // return length of the record with delimiters
+    int getLengthOfRecord(){
+        return ((this->getID().length()) + (this->getName().length()) + (this->getAddress().length())) + 3;
+    }
 };
 
 class AuthorData {
 private:
     static const string FileName;
-    static Author getAuthorDataFromUser(){
-        // try to get valid data from user
-        // throw error if anything went wrong
-        // else return author
-        return Author("", "", "");
-    }
+
     void loadIndexInMemory(){
 
     }
@@ -155,15 +226,15 @@ private:
     // return vector of vectors were the vector hold offset number, and it's size
     static vector<map<int, int>> putAvailListInVector(){
         AuthorHeader header;
-        header.readHeaderRecord();
+        fstream f;
+        f.open(AuthorData::getFileName(), ios::out);
+
+        header.readHeaderRecord(f);
         int availListPointer = stoi(header.availList);
 
         vector<map<int, int>> vectorOfNodes;
 
         // check that if avail list is empty
-
-        fstream f;
-        f.open(AuthorData::getFileName(), ios::out);
         try {
             while (true) {
 
@@ -203,7 +274,7 @@ private:
                 }
                 int recordLength = stoi(sizeOfRecordInAvailList);
 
-                map.insert(make_pair(availListPointer, recordLength));
+                map.insert(make_pair(recordLength, availListPointer));
 
                 availListPointer = stoi(nextNodePointer);
 
@@ -216,6 +287,7 @@ private:
         }
     }
 
+    // sort the vector of nodes in avail list in ascending order
     static void sortAvailList(vector<map<int, int>>&vec){
         auto comparator = [](const std::map<int, int>& a, const std::map<int, int>& b) {
             // Comparing maps based on their first key
@@ -225,30 +297,17 @@ private:
     }
 
     // will return the offset of the suitable record
-    static int availList(){
+    static int availList(int recordLength){
         vector<map<int, int>> availListVector = putAvailListInVector();
         sortAvailList(availListVector);
-        // this error to return to this line and continue
-        askdknaskjldnlaskmnd;
-
-    }
-public:
-    AuthorData(){
-        fstream File;
-        File.open(FileName, ios::app|ios::out|ios::in);
-        if (!File.good()){
-            throw (FileError("Can't open file with name : " + this->FileName));
+        // return the suitable size that fit the new one
+        for (int i = 0; i < availListVector.size(); ++i) {
+            if (availListVector[i].begin()->first >= recordLength){
+                return availListVector[i].begin()->first;
+            }
         }
+        return -1;
     }
-    void printFileContent(){
-        fstream file_;
-        file_.open(FileName, ios::app|ios::out|ios::in);
-        cout << file_.rdbuf() << endl;
-    }
-    static string getFileName(){
-        return AuthorData::FileName;
-    }
-    static bool addAuthor();
 
     static Author getValidAuthorDataFromUser(){
         char name[Author::SIZE], id[Author::SIZE_ID], Address[Author::SIZE];
@@ -266,13 +325,60 @@ public:
         return Author(id, name, Address);
     }
 
+public:
+    AuthorData(){
+        fstream File;
+        File.open(FileName, ios::app|ios::out|ios::in);
+        if (!File.good()){
+            throw (FileError("Can't open file with name : " + this->FileName));
+        }
+    }
+    void printFileContent(){
+        fstream file_;
+        file_.open(FileName, ios::app|ios::out|ios::in);
+        cout << file_.rdbuf() << endl;
+    }
+    static string getFileName(){
+        return AuthorData::FileName;
+    }
+    static bool addAuthor();
 };
 
 const string AuthorData::FileName = "Data\\Author.txt";
 
 bool AuthorData::addAuthor() {
+    // check that is first row will add in the file
+    fstream file;
+    file.open(AuthorData::getFileName(), ios::out|ios::in);
+
+    file.seekg(0, ios::beg);
+    int fileBegin = file.tellg();
+    file.seekg(0, ios::end);
+    int fileEnd = file.tellg();
+
+    if (fileBegin == fileEnd){
+        AuthorHeader::updateHeaderRecord(file);
+    }
+
     // get the data from the user
-    Author author = getAuthorDataFromUser();
+    Author author = getValidAuthorDataFromUser();
+    int recordLength = author.getLengthOfRecord();
+    int suitableOffsetIfFound = availList(recordLength);
+
+    if (file.is_open()){
+        if (suitableOffsetIfFound != -1){
+            file.seekp(suitableOffsetIfFound, ios::beg);
+            // mark the remaining part as deleted
+        }
+        else {
+            file.seekp(0, ios::end);
+        }
+        file << author;
+    }
+    else {
+        cerr << "Error While Add The Author" << endl;
+    }
+
 
     // check the avail list
     // add in the main file !!!
