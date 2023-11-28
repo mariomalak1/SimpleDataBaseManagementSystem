@@ -17,7 +17,6 @@ using namespace std;
 #include <chrono>
 #include <ctime>
 #include <iomanip>
-#include <sstream>
 
 // imports for ios
 #include <iostream>
@@ -25,6 +24,7 @@ using namespace std;
 #include <fstream>
 
 struct AuthorHeader{
+public:
     static const int NUM_RECORDS_SIZE = 5;
     static const int DATE_TIME_SIZE = 19;
     static const int AVAIL_LIST_SIZE = 6;
@@ -34,8 +34,6 @@ struct AuthorHeader{
     static char availList[AVAIL_LIST_SIZE];
 
     static void parseHeader(string header){
-        char c;
-
         // put avail list pointer
         int i = 0, j = 0;
         string availListPointer, update;
@@ -88,10 +86,23 @@ struct AuthorHeader{
         }
 
         int numRecordsInFIle = stoi(numberRecords);
-        oss << std::setw(5) << std::setfill('0') << numberRecords;
+        oss << std::setw(NUM_RECORDS_SIZE - 1) << std::setfill('0') << numRecordsInFIle;
         strncpy(numRecords, oss.str().c_str(), NUM_RECORDS_SIZE - 1);
     }
+    static void setUpdatedDateTime(){
+        chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        // Convert the system time point to a time_t object
+        time_t currentTime = std::chrono::system_clock::to_time_t(now);
 
+        // Convert the time_t object to a local time struct
+        tm* localTime = std::localtime(&currentTime);
+
+        ostringstream oss;
+        oss << std::put_time(localTime, "%Y-%m-%d %H:%M:%S");
+        std::string formattedTime = oss.str();
+        strncpy(lastUpdated, formattedTime.c_str(), DATE_TIME_SIZE - 1);
+        lastUpdated[DATE_TIME_SIZE - 1] = '\0';  // Ensure null-termination
+    }
     static void readHeaderRecord(fstream &file){
         string header;
         file.seekg(0, ios::beg);
@@ -99,8 +110,36 @@ struct AuthorHeader{
         parseHeader(header);
     }
 
-    static void updateHeaderRecord(fstream &file){
+    static void updateHeaderRecord(fstream &file, int addNumberOfRecords = 0){
+        // update date and time
+        setUpdatedDateTime();
+
+        // update number of records
+        if(addNumberOfRecords){
+            int numRecords_ = stoi(numRecords);
+            numRecords_ += addNumberOfRecords;
+
+            std::ostringstream oss;
+            oss << std::setw(NUM_RECORDS_SIZE - 1) << std::setfill('0') << to_string(numRecords_);
+            std::string formattedNumber = oss.str();
+
+            strncpy(numRecords, formattedNumber.c_str(), NUM_RECORDS_SIZE - 1);
+            numRecords[NUM_RECORDS_SIZE - 1] = '\0';
+        }
+
         file << availList << '|' << numRecords << '|' << lastUpdated << '|' <<'\n';
+    }
+
+    // update avail list pointer, and number of records with -1 or 1 as the user determine
+    static void updateAvailList(fstream &file, int firstOffset, int numberRecordsAdded){
+        std::ostringstream oss;
+        oss << std::setw(AVAIL_LIST_SIZE - 1) << std::setfill('0') << to_string(firstOffset);
+        std::string formattedNumber = oss.str();
+
+        strncpy(availList, formattedNumber.c_str(), AVAIL_LIST_SIZE - 1);
+        availList[AVAIL_LIST_SIZE - 1] = '\0';
+
+        updateHeaderRecord(file, numberRecordsAdded);
     }
 
     int HeaderLength(){
@@ -219,9 +258,9 @@ class AuthorData {
 private:
     static const string FileName;
 
-    void loadIndexInMemory(){
-
-    }
+//    void loadIndexInMemory(){
+//
+//    }
 
     // return vector of vectors were the vector hold offset number, and it's size
     static vector<map<int, int>> putAvailListInVector(){
@@ -379,9 +418,10 @@ bool AuthorData::addAuthor() {
         cerr << "Error While Add The Author" << endl;
     }
 
+    // update header
+    AuthorHeader::updateHeaderRecord(file, 1);
 
-    // check the avail list
-    // add in the main file !!!
+
     // add in index file -> automatically sort the file again in the memory !!!
     // ****  then go to write it in the index file !!!
     return false;

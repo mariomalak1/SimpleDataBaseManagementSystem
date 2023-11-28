@@ -1,9 +1,4 @@
 #include "Application.cpp"
-#include "AuthorData.cpp"
-
-#include <chrono>
-#include <ctime>
-#include <iomanip>
 
 int main() {
 //    AuthorData authorData = AuthorData();
@@ -30,20 +25,20 @@ int main() {
 ////    authorData.printFileContent();
 
 
-//    Application::run();
-    // Get the current system time point
-    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-
-    // Convert the system time point to a time_t object
-    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
-
-    // Convert the time_t object to a local time struct
-    std::tm* localTime = std::localtime(&currentTime);
-
-    std::cout << "Custom format: " << std::put_time(localTime, "%Y-%m-%d %H:%M:%S") << std::endl;
-
-    // Display the current date and time
-    std::cout << "Current date and time: " << std::asctime(localTime);
+    Application::run();
+//    // Get the current system time point
+//    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+//
+//    // Convert the system time point to a time_t object
+//    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+//
+//    // Convert the time_t object to a local time struct
+//    std::tm* localTime = std::localtime(&currentTime);
+//
+//    std::cout << "Custom format: " << std::put_time(localTime, "%Y-%m-%d %H:%M:%S") << std::endl;
+//
+//    // Display the current date and time
+//    std::cout << "Current date and time: " << std::asctime(localTime);
 
     //    Author * author = AuthorData::linear_search_ID("ID");
 //    if (author == nullptr){
