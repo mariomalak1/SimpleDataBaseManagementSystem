@@ -122,7 +122,6 @@ public:
 
     // return length of the record with delimiters
     int getLengthOfRecord(){
-        cout << "ID : " << this->getID().length() << " - Name : " << (this->getName().length()) << " - Address : " << (this->getAddress().length()) << endl;
         return ((this->getID().length()) + (this->getName().length()) + (this->getAddress().length())) + 3;
     }
 };
@@ -143,21 +142,16 @@ private:
     }
 
     // return vector of vectors were the vector hold offset number, and it's size
-    static vector<map<int, int>> putAvailListInVector(){
-        fstream f;
-        f.open(AuthorData::getFileName(), ios::out);
+    static vector<map<int, int>> putAvailListInVector(fstream &f){
 
         AuthorHeader::readHeaderRecord(f);
         int availListPointer = (AuthorHeader::getFirstNodeAvailList());
-
-        cout << "availListPointer : " << availListPointer << endl;
 
         vector<map<int, int>> vectorOfNodes;
 
         // check that if avail list is empty
         try {
             while (true) {
-
                 if (availListPointer == -1) {
                     return vectorOfNodes;
                 }
@@ -208,8 +202,8 @@ private:
     }
 
     // will return the offset of the suitable record
-    static int availList(int recordLength){
-        vector<map<int, int>> availListVector = putAvailListInVector();
+    static int availList(int recordLength, fstream&f){
+        vector<map<int, int>> availListVector = putAvailListInVector(f);
         sortAvailList(availListVector);
         // return the suitable size that fit the new one
         for (int i = 0; i < availListVector.size(); ++i) {
@@ -238,6 +232,17 @@ private:
         return Author(id, name, Address);
     }
 
+    static void checkFileIsFirstOpen(fstream &file){
+        file.seekg(0, ios::beg);
+        int fileBegin = file.tellg();
+        file.seekg(0, ios::end);
+        int fileEnd = file.tellg();
+
+        if (fileBegin == fileEnd){
+            AuthorHeader::updateHeaderRecord(file, 0, true);
+        }
+    }
+
 public:
     AuthorData(){
         fstream File;
@@ -246,14 +251,17 @@ public:
             throw (FileError("Can't open file with name : " + this->FileName));
         }
     }
-    void printFileContent(){
+
+    static void printFileContent(){
         fstream file_;
         file_.open(FileName, ios::app|ios::out|ios::in);
         cout << file_.rdbuf() << endl;
     }
+
     static string getFileName(){
         return AuthorData::FileName;
     }
+
     static bool addAuthor();
 };
 
@@ -264,38 +272,29 @@ bool AuthorData::addAuthor() {
     fstream file;
     file.open(AuthorData::getFileName(), ios::out|ios::in);
 
-    file.seekg(0, ios::beg);
-    int fileBegin = file.tellg();
-    file.seekg(0, ios::end);
-    int fileEnd = file.tellg();
+    // will add the header if it's the first time to open the file
+    checkFileIsFirstOpen(file);
 
-    if (fileBegin == fileEnd){
-        AuthorHeader::updateHeaderRecord(file, 0, true);
-    }
+    AuthorHeader::readHeaderRecord(file);
 
     // get the data from the user
     Author author = getValidAuthorDataFromUser();
     int recordLength = author.getLengthOfRecord();
-    int suitableOffsetIfFound = availList(recordLength);
+    int suitableOffsetIfFound = availList(recordLength, file);
 
-//    if (file.is_open()){
     if (suitableOffsetIfFound != -1){
         file.seekp(suitableOffsetIfFound, ios::beg);
         // mark the remaining part as deleted
     }
     else {
-        file.seekp(0, ios::end);
+        file.seekg(0, ios::end);
     }
+
     file << author;
-//    }
-//    else {
-//        cerr << "Error While Add The Author" << endl;
-//    }
 
     // update header
     AuthorHeader::updateHeaderRecord(file, 1);
-
-
+    file.close();
     // add in index file -> automatically sort the file again in the memory !!!
     // ****  then go to write it in the index file !!!
     return false;

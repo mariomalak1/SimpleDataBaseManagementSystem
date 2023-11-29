@@ -14,20 +14,11 @@ using namespace std;
 
 class AuthorHeader{
 private:
-    static const int NUM_RECORDS_SIZE = 5;
     static const int DATE_TIME_SIZE = 19;
 
     static string numRecords;
     static char lastUpdated[DATE_TIME_SIZE]; // date and time
     static string availList;
-
-
-    // function to copy a string to arr of chars
-    static void copyToC_String(char * arr, int length, const string& str ){
-        // Copy the string to the array of chars
-        strncpy(arr, str.c_str(), length - 1);
-        arr[length - 1] = '\0';  // Ensure null-termination
-    }
 
     static string formatString(int sizeToFill, char characterToFill, const string& str){
         std::ostringstream oss;
@@ -48,15 +39,13 @@ private:
                 break;
             }
         }
-        int number = stoi(availListPointer);
 
-        // Copy the formatted string to the availList array
-        strncpy(availList, formatString(AVAIL_LIST_SIZE - 1, '0', to_string(number)).c_str(), AVAIL_LIST_SIZE - 1);
-        availList[AVAIL_LIST_SIZE - 1] = '\0';  // Ensure null-termination
+        availList = availListPointer;
 
 
-        // last updated date and time
+        // to skip the delimiter
         i++;
+        // last updated date and time
         while (true){
             if (header[i] >= 48 and header[i] <= 57){
                 update += header[i];
@@ -66,9 +55,9 @@ private:
                 break;
             }
         }
-
+        // copy date and time in lastUpdated
         strncpy(lastUpdated, update.c_str(), DATE_TIME_SIZE - 1);
-        lastUpdated[AVAIL_LIST_SIZE - 1] = '\0';
+        lastUpdated[DATE_TIME_SIZE - 1] = '\0';
 
 
         // number of records
@@ -83,9 +72,7 @@ private:
                 break;
             }
         }
-        int numRecordsInFIle = stoi(numberRecords);
-        strncpy(numRecords, formatString(NUM_RECORDS_SIZE - 1, '0', to_string(numRecordsInFIle)).c_str(), NUM_RECORDS_SIZE - 1);
-        numberRecords[NUM_RECORDS_SIZE - 1] = '\0';
+        numRecords = numberRecords;
     }
 
     static void setUpdatedDateTime(){
@@ -100,7 +87,9 @@ private:
         oss << std::put_time(localTime, "%Y-%m-%d %H:%M:%S");
         std::string formattedTime = oss.str();
 
-        copyToC_String(lastUpdated, DATE_TIME_SIZE, formattedTime.c_str());
+        // copy date and time in lastUpdated
+        strncpy(lastUpdated, formattedTime.c_str(), DATE_TIME_SIZE - 1);
+        lastUpdated[DATE_TIME_SIZE - 1] = '\0';
     }
 
     // function to write header content to file
@@ -112,12 +101,10 @@ private:
     // function to make header that it first time to create it
     static void makeHeader(fstream &file){
         // avail list
-        string str = formatString(AVAIL_LIST_SIZE - 1, '0', "-1");
-        copyToC_String(availList, AVAIL_LIST_SIZE, str);
+        availList = "-1";
 
         // number of records
-        str = formatString(NUM_RECORDS_SIZE, '0', "0");
-        copyToC_String(numRecords, NUM_RECORDS_SIZE, str);
+        numRecords = "0";
 
         // data and time
         setUpdatedDateTime();
@@ -128,11 +115,11 @@ private:
 
 public:
     static int getFirstNodeAvailList(){
-        size_t length = strlen(availList);
-        if (length > 0){
-            return stoi(availList);
-        }else{
+        if (availList.empty()){
+            availList = "-1";
             return -1;
+        }else{
+            return stoi(availList);
         }
     }
 
@@ -140,11 +127,12 @@ public:
         string header;
         file.seekg(0, ios::beg);
         getline(file, header);
-        if (header.length()){
-            parseHeader(header);
+        cout << "header : " << header << endl;
+        if (header.empty()){
+            makeHeader(file);
         }
         else {
-            makeHeader(file);
+            parseHeader(header);
         }
     }
 
@@ -158,21 +146,21 @@ public:
         else{
             // update number of records
             if(addNumberOfRecords){
+                cout << "from header when add new record numRecords : " << numRecords << endl;
                 int numRecords_ = stoi(numRecords);
                 numRecords_ += addNumberOfRecords;
-                strncpy(numRecords, formatString(NUM_RECORDS_SIZE - 1, '0', to_string(numRecords_)).c_str(), NUM_RECORDS_SIZE - 1);
-                numRecords[NUM_RECORDS_SIZE - 1] = '\0';
+                numRecords = to_string(numRecords_);
             }
         }
         writeHeader(file);
     }
 
     int HeaderLength(){
-        return (NUM_RECORDS_SIZE + DATE_TIME_SIZE) + strlen(availList);
+        return (DATE_TIME_SIZE) + (availList.length()) + (numRecords.length());
     }
 };
-char AuthorHeader::availList[];
 char AuthorHeader::lastUpdated[AuthorHeader::DATE_TIME_SIZE];
-char AuthorHeader::numRecords[AuthorHeader::NUM_RECORDS_SIZE];
+string AuthorHeader::availList = "";
+string AuthorHeader::numRecords = "";
 
 #endif SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORHEADER_H
