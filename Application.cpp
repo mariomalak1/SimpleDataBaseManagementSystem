@@ -30,7 +30,11 @@ private:
 
     static void redirectToAction(string response){
         if (response == "1"){
-            AuthorData::addAuthor();
+            if (AuthorData::addAuthor()){
+                cout << "Record added successfully" << endl;
+            }else{
+                cout << "Can't add the record" << endl;
+            }
         }
         else if (response == "2"){
             // add new book
@@ -48,7 +52,18 @@ private:
             // delete author with id
         }
         else if (response == "7"){
-            // print author with id
+            cin.ignore();
+            string id;
+            cout << "Enter Author ID : ";
+            cin >> id;
+            int authorOffset;
+            Author * author = AuthorData::linear_search_ID(id, authorOffset);
+            if (author != nullptr){
+                cout << *author << " --- Offset : " << authorOffset << endl;
+            }
+            else {
+                cout << "No Author With ID : " << id << endl;
+            }
         }
         else if (response == "8"){
             // print book with id

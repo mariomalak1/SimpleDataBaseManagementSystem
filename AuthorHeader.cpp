@@ -4,11 +4,15 @@
 // imports for ios
 #include <iostream>
 #include <cstring>
-#include <fstream>
 // this imports for date and time and to manipulate it
+#include <fstream>
 #include <chrono>
 #include <ctime>
 #include <iomanip>
+
+// some needed data structure
+#include <vector>
+#include <map>
 
 using namespace std;
 
@@ -20,18 +24,12 @@ private:
     static char lastUpdated[DATE_TIME_SIZE]; // date and time
     static string availList;
 
-    static string formatString(int sizeToFill, char characterToFill, const string& str){
-        std::ostringstream oss;
-        oss << std::setw(sizeToFill) << std::setfill(characterToFill) << str;
-        return oss.str();
-    }
-
     static void parseHeader(string header){
         // put avail list pointer
         int i = 0;
         string availListPointer, update;
         while (true){
-            if (header[i] >= 48 and header[i] <= 57){
+            if ((header[i] >= 48 and header[i] <= 57) || (header[i] == '-' and i == 0) ){
                 availListPointer += header[i];
                 i++;
             }
@@ -42,9 +40,6 @@ private:
 
         availList = availListPointer;
 
-
-        // to skip the delimiter
-        i++;
         // last updated date and time
         while (true){
             if (header[i] >= 48 and header[i] <= 57){
@@ -114,6 +109,63 @@ private:
     }
 
 public:
+    // return vector of vectors were the vector hold offset number, and it's size
+    static vector<map<int, int>> AvailList(fstream &f){
+        AuthorHeader::readHeaderRecord(f);
+        int availListPointer = (AuthorHeader::getFirstNodeAvailList());
+
+        vector<map<int, int>> vectorOfNodes;
+
+        try {
+            while (true) {
+                if (availListPointer == -1) {
+                    return vectorOfNodes;
+                }
+
+                char c;
+                map<int, int> map;
+                string sizeOfRecordInAvailList, nextNodePointer;
+                f.seekg(availListPointer);
+
+                // to move after *
+                f.seekg(1, ios::cur);
+
+                // to parse the next pointer record offset
+                while (true) {
+                    f.get(c);
+                    if (c >= 48 and c <= 57) {
+                        nextNodePointer += c;
+                    } else {
+                        break;
+                    }
+                }
+
+                // to move after | delimiter
+                f.seekg(1, ios::cur);
+
+                // to parse the size of record
+                while (true) {
+                    f.get(c);
+                    if (c >= 48 and c <= 57) {
+                        sizeOfRecordInAvailList += c;
+                    } else {
+                        break;
+                    }
+                }
+                int recordLength = stoi(sizeOfRecordInAvailList);
+
+                map.insert(make_pair(recordLength, availListPointer));
+
+                availListPointer = stoi(nextNodePointer);
+
+                vectorOfNodes.push_back(map);
+            }
+        }
+        catch(...){
+            return vectorOfNodes;
+        }
+    }
+
     static int getFirstNodeAvailList(){
         if (availList.empty()){
             availList = "-1";
@@ -123,11 +175,17 @@ public:
         }
     }
 
+    static int HeaderLength(fstream &f){
+        // update header data
+        AuthorHeader::readHeaderRecord(f);
+        // length of header + delimiter + '\n'
+        return (DATE_TIME_SIZE) + (availList.length()) + (numRecords.length()) + 3 + 1;
+    }
+
     static void readHeaderRecord(fstream &file){
         string header;
         file.seekg(0, ios::beg);
         getline(file, header);
-        cout << "header : " << header << endl;
         if (header.empty()){
             makeHeader(file);
         }
@@ -146,17 +204,12 @@ public:
         else{
             // update number of records
             if(addNumberOfRecords){
-                cout << "from header when add new record numRecords : " << numRecords << endl;
                 int numRecords_ = stoi(numRecords);
                 numRecords_ += addNumberOfRecords;
                 numRecords = to_string(numRecords_);
             }
         }
         writeHeader(file);
-    }
-
-    int HeaderLength(){
-        return (DATE_TIME_SIZE) + (availList.length()) + (numRecords.length());
     }
 };
 char AuthorHeader::lastUpdated[AuthorHeader::DATE_TIME_SIZE];

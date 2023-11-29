@@ -13,15 +13,9 @@ using namespace std;
 #include <vector>
 #include <map>
 
-// this imports for date and time and to manipulate it
-#include <chrono>
-#include <ctime>
-#include <iomanip>
-
 // imports for ios
 #include <iostream>
 #include <cstring>
-#include <fstream>
 
 
 class Author{
@@ -113,6 +107,7 @@ public:
         return out;
     }
 
+    // write author in file with length indicator record and field delimiter
     friend fstream& operator << (fstream &file, Author author){
         // length indicator is about all length of fields + 3 delimiters
         int length = ((author.getID().length()) + (author.getName().length()) + (author.getAddress().length())) + 3;
@@ -141,69 +136,9 @@ private:
         }
     }
 
-    // return vector of vectors were the vector hold offset number, and it's size
-    static vector<map<int, int>> putAvailListInVector(fstream &f){
-
-        AuthorHeader::readHeaderRecord(f);
-        int availListPointer = (AuthorHeader::getFirstNodeAvailList());
-
-        vector<map<int, int>> vectorOfNodes;
-
-        // check that if avail list is empty
-        try {
-            while (true) {
-                if (availListPointer == -1) {
-                    return vectorOfNodes;
-                }
-
-                char c;
-                map<int, int> map;
-                string sizeOfRecordInAvailList, nextNodePointer;
-                f.seekg(availListPointer);
-
-                // to move after *
-                f.seekg(1, ios::cur);
-
-                // to parse the next pointer record offset
-                while (true) {
-                    f.get(c);
-                    if (c >= 48 and c <= 57) {
-                        nextNodePointer += c;
-                    } else {
-                        break;
-                    }
-                }
-
-                // to move after | delimiter
-                f.seekg(1, ios::cur);
-
-                // to parse the size of record
-                while (true) {
-                    f.get(c);
-                    if (c >= 48 and c <= 57) {
-                        sizeOfRecordInAvailList += c;
-                    } else {
-                        break;
-                    }
-                }
-                int recordLength = stoi(sizeOfRecordInAvailList);
-
-                map.insert(make_pair(recordLength, availListPointer));
-
-                availListPointer = stoi(nextNodePointer);
-
-                vectorOfNodes.push_back(map);
-            }
-        }
-        catch(...){
-            cerr << "Error While showing the Avail List in putAvailListInVector, remove this statement if already done and fix the error" << endl;
-            return vectorOfNodes;
-        }
-    }
-
     // will return the offset of the suitable record
     static int availList(int recordLength, fstream&f){
-        vector<map<int, int>> availListVector = putAvailListInVector(f);
+        vector<map<int, int>> availListVector = AuthorHeader::AvailList(f);
         sortAvailList(availListVector);
         // return the suitable size that fit the new one
         for (int i = 0; i < availListVector.size(); ++i) {
@@ -243,15 +178,77 @@ private:
         }
     }
 
-public:
-    AuthorData(){
-        fstream File;
-        File.open(FileName, ios::app|ios::out|ios::in);
-        if (!File.good()){
-            throw (FileError("Can't open file with name : " + this->FileName));
-        }
+    static string readAuthorRecord(fstream &f, int recordLength, int indexAfterIndicator) {
+        f.seekg(indexAfterIndicator, ios::beg);
+
+        char * record = new char[recordLength];
+        f.read(record, recordLength);
+        return record;
     }
 
+    static void splitRecordIntoAuthor(Author & author, string record){
+        int i = 0;
+
+        // if the record length is less than the default will throw error
+        if (record.length() <= 1) {
+            throw ReadRecordError();
+        }
+
+        // fill name string
+        string name = "";
+        while (i < record.length() && record[i] != '|'){
+            name += record[i];
+            i++;
+        }
+
+        i++;
+
+        // fill id string
+        string id;
+        while (i < record.length() && record[i] != '|'){
+            id += record[i];
+            i++;
+        }
+
+        i++;
+
+        // fill address string
+        string address;
+        while (i < record.length() && record[i] != '|'){
+            address += record[i];
+            i++;
+        }
+
+        author.setName(const_cast<char *>(name.c_str()));
+        author.setID(const_cast<char *>(id.c_str()));
+        author.setAddress(const_cast<char *>(address.c_str()));
+    }
+
+    static int readLengthIndicator(fstream &f, int index) {
+
+        f.seekg(index, ios::beg);
+
+        string lengthIndicator = "";
+        char ch;
+        while (!f.eof() && ch != '|'){
+            f >> ch;
+            // check that the character is between 0 and 9
+            if (ch >= 48 && ch <= 57){
+                lengthIndicator += ch;
+            }else{
+                break;
+            }
+        }
+        int length;
+        try {
+            length = stoi(lengthIndicator);
+        }
+        catch (...){
+            throw LengthIndicatorError();
+        }
+        return length;
+    }
+public:
     static void printFileContent(){
         fstream file_;
         file_.open(FileName, ios::app|ios::out|ios::in);
@@ -263,6 +260,8 @@ public:
     }
 
     static bool addAuthor();
+
+    static Author * linear_search_ID(string id, int & AuthorOffset);
 };
 
 const string AuthorData::FileName = "Data\\Author.txt";
@@ -279,6 +278,14 @@ bool AuthorData::addAuthor() {
 
     // get the data from the user
     Author author = getValidAuthorDataFromUser();
+
+    // check that no id entered before as this id from index or linear search
+    int authorOffset;
+    if(linear_search_ID(author.getID(), authorOffset) != nullptr){
+        cerr << "You can't add id that entered before" << endl;
+        return false;
+    }
+
     int recordLength = author.getLengthOfRecord();
     int suitableOffsetIfFound = availList(recordLength, file);
 
@@ -297,7 +304,56 @@ bool AuthorData::addAuthor() {
     file.close();
     // add in index file -> automatically sort the file again in the memory !!!
     // ****  then go to write it in the index file !!!
-    return false;
+    return true;
 }
 
+Author * AuthorData::linear_search_ID(string id, int & AuthorOffset) {
+    fstream f;
+    f.open(AuthorData::getFileName(), ios::in);
+
+    int offset = AuthorHeader::HeaderLength(f);
+
+    Author author("No ID", "No Name", "No Address");
+
+    while (true){
+        try{
+            f.seekg(offset, ios::beg);
+            try{
+                // read (length indicator) first
+                int recordLength = AuthorData::readLengthIndicator(f, offset);
+
+                // read the hole record
+                string record = AuthorData::readAuthorRecord(f, recordLength, offset + to_string(recordLength).length());
+
+                // split the record and put in author object
+                AuthorData::splitRecordIntoAuthor(author, record);
+
+                if (author.getID() == id){
+                    AuthorOffset = offset;
+                    return new Author(author);
+                }
+
+                else {
+                    offset += recordLength + to_string(recordLength).length();
+                    f.seekg(0, ios::end);
+
+                    if (f.tellg() == offset){
+                        AuthorOffset = -1;
+                        return nullptr;
+                    }
+                }
+            }
+            catch(...){
+                AuthorOffset = -1;
+                return nullptr;
+            }
+
+        }
+        catch(...){
+            AuthorOffset = -1;
+            return nullptr;
+        }
+    }
+    return nullptr;
+}
 #endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORDATA_H
