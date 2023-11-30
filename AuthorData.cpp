@@ -128,7 +128,7 @@ private:
     // sort the vector of nodes in avail list in ascending order
     static void sortAvailList(vector<map<int, int>>&vec){
         if (!vec.empty()){
-            auto comparator = [](const std::map<int, int>& a, const std::map<int, int>& b) {
+            auto comparator = [](const map<int, int>& a, const map<int, int>& b) {
                 // Comparing maps based on their first key
                 return a.begin()->first < b.begin()->first;
             };
@@ -176,14 +176,6 @@ private:
         if (fileBegin == fileEnd){
             AuthorHeader::updateHeaderRecord(file, 0, true);
         }
-    }
-
-    static string readAuthorRecord(fstream &f, int recordLength, int indexAfterIndicator) {
-        f.seekg(indexAfterIndicator, ios::beg);
-
-        char * record = new char[recordLength];
-        f.read(record, recordLength);
-        return record;
     }
 
     static void splitRecordIntoAuthor(Author & author, string record){
@@ -248,7 +240,16 @@ private:
         }
         return length;
     }
+
+    static string readAuthorRecord(fstream &f, int recordLength, int indexAfterIndicator) {
+        f.seekg(indexAfterIndicator, ios::beg);
+
+        char * record = new char[recordLength];
+        f.read(record, recordLength);
+        return record;
+    }
 public:
+
     static void printFileContent(){
         fstream file_;
         file_.open(FileName, ios::app|ios::out|ios::in);
@@ -257,6 +258,24 @@ public:
 
     static string getFileName(){
         return AuthorData::FileName;
+    }
+
+    static Author * readAuthor(fstream &f, int offset = 0){
+        Author * author = new Author("NO ID", "No Name", "No Address");
+        try{
+            // read (length indicator) first
+            int recordLength = AuthorData::readLengthIndicator(f, offset);
+
+            // read the hole record
+            string record = AuthorData::readAuthorRecord(f, recordLength, offset + to_string(recordLength).length());
+
+            // split the record and put in author object
+            AuthorData::splitRecordIntoAuthor(*author, record);
+            return author;
+        }
+        catch(...){
+            return nullptr;
+        }
     }
 
     static bool addAuthor();
@@ -313,27 +332,21 @@ Author * AuthorData::linear_search_ID(string id, int & AuthorOffset) {
 
     int offset = AuthorHeader::HeaderLength(f);
 
-    Author author("No ID", "No Name", "No Address");
-
     while (true){
         try{
+            Author * author = readAuthor(f, offset);
+            if(author == nullptr){
+                return nullptr;
+            }
             f.seekg(offset, ios::beg);
             try{
-                // read (length indicator) first
-                int recordLength = AuthorData::readLengthIndicator(f, offset);
-
-                // read the hole record
-                string record = AuthorData::readAuthorRecord(f, recordLength, offset + to_string(recordLength).length());
-
-                // split the record and put in author object
-                AuthorData::splitRecordIntoAuthor(author, record);
-
-                if (author.getID() == id){
+                if (author->getID() == id){
                     AuthorOffset = offset;
-                    return new Author(author);
+                    return author;
                 }
 
                 else {
+                    int recordLength = author->getLengthOfRecord();
                     offset += recordLength + to_string(recordLength).length();
                     f.seekg(0, ios::end);
 

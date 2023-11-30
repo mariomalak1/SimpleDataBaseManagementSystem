@@ -1,7 +1,7 @@
 #include "Application.cpp"
-
+#include "Indexes/AuthorPrimaryIndex.cpp"
 int main() {
-    Application::run();
+//    Application::run();
 
 //    AuthorData authorData = AuthorData();
 ////    Author author = Author("ID", "Name", "Address");
@@ -49,6 +49,31 @@ int main() {
 //        cout << *author << endl;
 //    }
 //    return 0;
+
+
+    AuthorPrimaryIndex authorPrimaryIndex;
+    authorPrimaryIndex.loadIndex();
+    for (int i = 0; i < authorPrimaryIndex.vec.size(); ++i) {
+        cout << authorPrimaryIndex.vec[i].begin()->first << "|" << authorPrimaryIndex.vec[i].begin()->second << endl;
+    }
+
+    Author author1 = Author("ID22", "Name", "Address");
+    authorPrimaryIndex.addAuthor(author1, 799);
+
+    string  arr [] = {"20210313", "kariakos", "202131354", "126315", "ID22"};
+
+    for (int i = 0; i < 5; ++i) {
+        Author * author = authorPrimaryIndex.search(arr[i]);
+        if (author != nullptr){
+            cout << *author << endl;
+        }else{
+            cout << "not founded author with id -> " << arr[i] << endl;
+        }
+    }
+
+
+//    authorPrimaryIndex.writeIndexFile();
+
 }
 
 
