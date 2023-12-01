@@ -27,15 +27,15 @@ private:
     string errorMessage;
 public:
     LengthIndicatorError(string errorMassage){
-        errorMassage = errorMassage;
+        errorMassage = errorMassage + '\n';
     }
 
     void pushError(){
-        cerr << errorMessage << endl;
+        cerr << errorMessage;
     }
 
     LengthIndicatorError(){
-        errorMessage = "Length Indicator is not valid";
+        errorMessage = "Length Indicator is not valid.\n";
     }
 };
 
@@ -44,9 +44,21 @@ private:
     string errorMessage;
 public:
     void pushError(){
-        cerr << errorMessage << endl;
+        cerr << errorMessage;
     }
     ReadRecordError(){
-        errorMessage = "Error while reading record.";
+        errorMessage = "Error while reading record.\n";
+    }
+};
+
+class WrongOffsetError{
+private:
+    string errorMessage;
+public:
+    void pushError(){
+        cerr << errorMessage;
+    }
+    WrongOffsetError(){
+        errorMessage = "Wrong Offset Error.\n";
     }
 };
