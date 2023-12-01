@@ -1,7 +1,9 @@
 #include "Application.cpp"
-#include "Indexes/AuthorPrimaryIndex.cpp"
+#include "Author/AuthorPrimaryIndex.cpp"
 int main() {
-//    Application::run();
+    Application application = Application();
+    application.run();
+
 
 //    AuthorData authorData = AuthorData();
 ////    Author author = Author("ID", "Name", "Address");
@@ -26,21 +28,6 @@ int main() {
 //    cout << author7 << endl;
 ////    authorData.printFileContent();
 
-
-//    // Get the current system time point
-//    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-//
-//    // Convert the system time point to a time_t object
-//    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
-//
-//    // Convert the time_t object to a local time struct
-//    std::tm* localTime = std::localtime(&currentTime);
-//
-//    std::cout << "Custom format: " << std::put_time(localTime, "%Y-%m-%d %H:%M:%S") << std::endl;
-//
-//    // Display the current date and time
-//    std::cout << "Current date and time: " << std::asctime(localTime);
-
     //    Author * author = AuthorData::linear_search_ID("ID");
 //    if (author == nullptr){
 //        cout << "No Found" << endl;
@@ -50,40 +37,38 @@ int main() {
 //    }
 //    return 0;
 
-
-    AuthorPrimaryIndex authorPrimaryIndex;
-    authorPrimaryIndex.loadIndex();
-    cout << "Print Vector" << endl;
-    for (int i = 0; i < authorPrimaryIndex.vec.size(); ++i) {
-        cout << authorPrimaryIndex.vec[i].begin()->first << "|" << authorPrimaryIndex.vec[i].begin()->second << endl;
-    }
-    cout << "End" << endl;
-
-    Author author = Author("2", "Name", "Address");
-    authorPrimaryIndex.addAuthor(author, 799);
-
-        Author author1 = Author("21", "Name", "Address");
-    authorPrimaryIndex.addAuthor(author1, 799);
 //
-        Author author2 = Author("213", "Name", "Address");
-    authorPrimaryIndex.addAuthor(author2, 799);
+//    AuthorPrimaryIndex authorPrimaryIndex;
+//    authorPrimaryIndex.loadIndex();
+//    for (int i = 0; i < authorPrimaryIndex.vec.size(); ++i) {
+//        cout << authorPrimaryIndex.vec[i].begin()->first << "|" << authorPrimaryIndex.vec[i].begin()->second << endl;
+//    }
 //
-        Author author3 = Author("2134", "Name", "Address");
-    authorPrimaryIndex.addAuthor(author3, 799);
+//    Author author = Author("2", "Name", "Address");
+//    authorPrimaryIndex.addAuthor(author, 799);
 //
-    string  arr [] = {"20210313", "kariakos", "202131354", "126315", "ID22"};
+//        Author author1 = Author("21", "Name", "Address");
+//    authorPrimaryIndex.addAuthor(author1, 799);
+////
+//        Author author2 = Author("213", "Name", "Address");
+//    authorPrimaryIndex.addAuthor(author2, 799);
+////
+//        Author author3 = Author("2134", "Name", "Address");
+//    authorPrimaryIndex.addAuthor(author3, 799);
+////
+//    string  arr [] = {"20210313", "kariakos", "202131354", "126315", "ID22"};
+//
+//    for (int i = 0; i < 5; ++i) {
+//        Author * author = authorPrimaryIndex.search(arr[i]);
+//        if (author != nullptr){
+//            cout << *author << endl;
+//        }else{
+//            cout << "not founded author with id -> " << arr[i] << endl;
+//        }
+//    }
 
-    for (int i = 0; i < 5; ++i) {
-        Author * author = authorPrimaryIndex.search(arr[i]);
-        if (author != nullptr){
-            cout << *author << endl;
-        }else{
-            cout << "not founded author with id -> " << arr[i] << endl;
-        }
-    }
 
-
-    authorPrimaryIndex.writeIndexFile();
+//    authorPrimaryIndex.writeIndexFile();
 
 }
 

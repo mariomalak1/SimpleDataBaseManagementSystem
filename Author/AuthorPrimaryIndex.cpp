@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
-#include "../AuthorData.cpp"
+#include "AuthorDataFile.cpp"
 
 class AuthorPrimaryIndex{
 private:
@@ -27,7 +27,7 @@ private:
         map<string, int> map;
 
         while (true){
-            Author * author = AuthorData::readAuthor(dataFile, offset);
+            Author * author = AuthorDataFile::readAuthor(dataFile, offset);
 
             if (author == nullptr){
                 dataFile.close();
@@ -45,7 +45,7 @@ private:
 
     void makeNewIndexFile(fstream &indexFile){
         fstream dataFile;
-        dataFile.open(AuthorData::getFileName(), ios::in);
+        dataFile.open(AuthorDataFile::getFileName(), ios::in);
         // put all data in data file
         readFileDataPutInMemory(dataFile);
 
@@ -201,10 +201,10 @@ public:
         int index = binarySearchInVector(vec, id);
         if (index != -1){
             fstream f;
-            f.open(AuthorData::getFileName(), ios::in);
+            f.open(AuthorDataFile::getFileName(), ios::in);
 
             int offset = vec[index].begin()->second;
-            author = AuthorData::readAuthor(f,offset);
+            author = AuthorDataFile::readAuthor(f,offset);
             return author;
         }
         return nullptr;

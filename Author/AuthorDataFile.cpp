@@ -1,9 +1,9 @@
-#ifndef SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORDATA_H
-#define SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORDATA_H
+#ifndef SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORFILEDATA_H
+#define SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORFILEDATA_H
 
 using namespace std;
 // files we create
-#include "FileError.cpp"
+#include "../FileError.cpp"
 #include "AuthorHeader.cpp"
 
 // some needed algorithms
@@ -33,12 +33,6 @@ public:
         strcpy(Address, address);
     }
 
-    Author(const string& id, const string& name, const string& address){
-        strcpy(ID, id.c_str());
-        strcpy_s(Name, name.c_str());
-        strcpy_s(Address, address.c_str());
-    }
-
     Author(Author const &au){
         int length = sizeof(au.ID)/sizeof(char);
         for (int i = 0; i < length; ++i) {
@@ -55,6 +49,24 @@ public:
         for (int i = 0; i < length; ++i) {
             this->Name[i] = au.Name[i];
         }
+    }
+
+    // get all data from user
+    static Author getValidAuthorDataFromUser(){
+        char name[Author::SIZE], id[Author::SIZE_ID], Address[Author::SIZE];
+
+        cin.ignore();
+
+        cout << "Enter Author ID: ";
+        cin.getline(id, Author::SIZE_ID);
+
+        cout << "Enter Author Name: ";
+        cin.getline(name, Author::SIZE);
+
+        cout << "Enter Author Address: ";
+        cin.getline(Address, Author::SIZE);
+
+        return Author(id, name, Address);
     }
 
     Author& operator=(const Author &au) {
@@ -121,7 +133,7 @@ public:
     }
 };
 
-class AuthorData {
+class AuthorDataFile {
 private:
     static const string FileName;
 
@@ -147,35 +159,6 @@ private:
             }
         }
         return -1;
-    }
-
-    // get all data from user
-    static Author getValidAuthorDataFromUser(){
-        char name[Author::SIZE], id[Author::SIZE_ID], Address[Author::SIZE];
-
-        cin.ignore();
-
-        cout << "Enter Author ID: ";
-        cin.getline(id, Author::SIZE_ID);
-
-        cout << "Enter Author Name: ";
-        cin.getline(name, Author::SIZE);
-
-        cout << "Enter Author Address: ";
-        cin.getline(Address, Author::SIZE);
-
-        return Author(id, name, Address);
-    }
-
-    static void checkFileIsFirstOpen(fstream &file){
-        file.seekg(0, ios::beg);
-        int fileBegin = file.tellg();
-        file.seekg(0, ios::end);
-        int fileEnd = file.tellg();
-
-        if (fileBegin == fileEnd){
-            AuthorHeader::updateHeaderRecord(file, 0, true);
-        }
     }
 
     static void splitRecordIntoAuthor(Author & author, string record){
@@ -249,28 +232,32 @@ private:
         return record;
     }
 public:
+    static void checkFileIsFirstOpen(fstream &file){
+        file.seekg(0, ios::beg);
+        int fileBegin = file.tellg();
+        file.seekg(0, ios::end);
+        int fileEnd = file.tellg();
 
-    static void printFileContent(){
-        fstream file_;
-        file_.open(FileName, ios::app|ios::out|ios::in);
-        cout << file_.rdbuf() << endl;
+        if (fileBegin == fileEnd){
+            AuthorHeader::updateHeaderRecord(file, 0, true);
+        }
     }
 
     static string getFileName(){
-        return AuthorData::FileName;
+        return AuthorDataFile::FileName;
     }
 
     static Author * readAuthor(fstream &f, int offset = 0){
         Author * author = new Author("NO ID", "No Name", "No Address");
         try{
             // read (length indicator) first
-            int recordLength = AuthorData::readLengthIndicator(f, offset);
+            int recordLength = AuthorDataFile::readLengthIndicator(f, offset);
 
             // read the hole record
-            string record = AuthorData::readAuthorRecord(f, recordLength, offset + to_string(recordLength).length());
+            string record = AuthorDataFile::readAuthorRecord(f, recordLength, offset + to_string(recordLength).length());
 
             // split the record and put in author object
-            AuthorData::splitRecordIntoAuthor(*author, record);
+            AuthorDataFile::splitRecordIntoAuthor(*author, record);
             return author;
         }
         catch(...){
@@ -278,28 +265,24 @@ public:
         }
     }
 
-    static bool addAuthor();
+    static bool addAuthor(Author &author, int &authorOffset);
 
     static Author * linear_search_ID(string id, int & AuthorOffset);
 };
 
-const string AuthorData::FileName = "Data\\Author.txt";
+const string AuthorDataFile::FileName = "Data\\Author.txt";
 
-bool AuthorData::addAuthor() {
+bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
     // check that is first row will add in the file
     fstream file;
-    file.open(AuthorData::getFileName(), ios::out|ios::in);
+    file.open(AuthorDataFile::getFileName(), ios::out|ios::in);
 
     // will add the header if it's the first time to open the file
     checkFileIsFirstOpen(file);
 
     AuthorHeader::readHeaderRecord(file);
 
-    // get the data from the user
-    Author author = getValidAuthorDataFromUser();
-
     // check that no id entered before as this id from index or linear search
-    int authorOffset;
     if(linear_search_ID(author.getID(), authorOffset) != nullptr){
         cerr << "You can't add id that entered before" << endl;
         return false;
@@ -316,19 +299,18 @@ bool AuthorData::addAuthor() {
         file.seekg(0, ios::end);
     }
 
+    authorOffset = file.tellp();
     file << author;
 
     // update header
     AuthorHeader::updateHeaderRecord(file, 1);
     file.close();
-    // add in index file -> automatically sort the file again in the memory !!!
-    // ****  then go to write it in the index file !!!
     return true;
 }
 
-Author * AuthorData::linear_search_ID(string id, int & AuthorOffset) {
+Author * AuthorDataFile::linear_search_ID(string id, int & AuthorOffset) {
     fstream f;
-    f.open(AuthorData::getFileName(), ios::in);
+    f.open(AuthorDataFile::getFileName(), ios::in);
 
     int offset = AuthorHeader::HeaderLength(f);
 
@@ -367,6 +349,5 @@ Author * AuthorData::linear_search_ID(string id, int & AuthorOffset) {
             return nullptr;
         }
     }
-    return nullptr;
 }
-#endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORDATA_H
+#endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORFILEDATA_H

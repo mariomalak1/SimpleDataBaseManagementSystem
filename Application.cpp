@@ -1,10 +1,12 @@
 #include <iostream>
-#include "AuthorData.cpp"
+#include "Author/AuthorData.cpp"
 using namespace std;
 
 class Application{
 private:
-    static void printMenu(){
+    AuthorData * authorData;
+
+    void printMenu(){
         cout << "1- Add New Author" << endl;
         cout << "2- Add New Book" << endl;
         cout << "3- Update Author Name (Author ID)" << endl;
@@ -17,7 +19,7 @@ private:
         cout << "0- Exit" << endl;
     }
 
-    static void getResponse(){
+    void getResponse(){
         while (true){
             string response;
             cout << "What's Your Response: ";
@@ -28,9 +30,9 @@ private:
         }
     }
 
-    static void redirectToAction(string response){
+    void redirectToAction(string response){
         if (response == "1"){
-            if (AuthorData::addAuthor()){
+            if (authorData->addAuthor()){
                 cout << "Record added successfully" << endl;
             }else{
                 cout << "Can't add the record" << endl;
@@ -52,14 +54,12 @@ private:
             // delete author with id
         }
         else if (response == "7"){
-            cin.ignore();
             string id;
             cout << "Enter Author ID : ";
             cin >> id;
-            int authorOffset;
-            Author * author = AuthorData::linear_search_ID(id, authorOffset);
+            Author * author = authorData->searchWithID(id);
             if (author != nullptr){
-                cout << *author << " --- Offset : " << authorOffset << endl;
+                cout << *author << endl;
             }
             else {
                 cout << "No Author With ID : " << id << endl;
@@ -80,8 +80,12 @@ private:
         }
     }
 public:
-    static void run() {
+    void run() {
         printMenu();
         getResponse();
+    }
+
+    Application(){
+        authorData = new AuthorData();
     }
 };
