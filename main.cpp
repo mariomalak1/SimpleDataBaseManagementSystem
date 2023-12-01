@@ -53,13 +53,24 @@ int main() {
 
     AuthorPrimaryIndex authorPrimaryIndex;
     authorPrimaryIndex.loadIndex();
+    cout << "Print Vector" << endl;
     for (int i = 0; i < authorPrimaryIndex.vec.size(); ++i) {
         cout << authorPrimaryIndex.vec[i].begin()->first << "|" << authorPrimaryIndex.vec[i].begin()->second << endl;
     }
+    cout << "End" << endl;
 
-    Author author1 = Author("ID22", "Name", "Address");
+    Author author = Author("2", "Name", "Address");
+    authorPrimaryIndex.addAuthor(author, 799);
+
+        Author author1 = Author("21", "Name", "Address");
     authorPrimaryIndex.addAuthor(author1, 799);
-
+//
+        Author author2 = Author("213", "Name", "Address");
+    authorPrimaryIndex.addAuthor(author2, 799);
+//
+        Author author3 = Author("2134", "Name", "Address");
+    authorPrimaryIndex.addAuthor(author3, 799);
+//
     string  arr [] = {"20210313", "kariakos", "202131354", "126315", "ID22"};
 
     for (int i = 0; i < 5; ++i) {
@@ -72,7 +83,7 @@ int main() {
     }
 
 
-//    authorPrimaryIndex.writeIndexFile();
+    authorPrimaryIndex.writeIndexFile();
 
 }
 

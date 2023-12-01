@@ -73,14 +73,16 @@ private:
             int intOffset;
 
             while (true) {
-
                 // to parse the next id record
                 while (true) {
                     f.get(c);
-                    if (c == '|') {
-                        id_ += c;
-                    } else {
+                    if (c == '\n'){
+                        continue;
+                    }
+                    else if (c == '|') {
                         break;
+                    } else {
+                        id_ += c;
                     }
                 }
 
@@ -93,10 +95,16 @@ private:
                         break;
                     }
                 }
+
+                if (id_.empty() and offset.empty()){
+                    break;
+                }
+
                 intOffset = stoi(offset);
                 map.insert(make_pair(id_, intOffset));
                 vec.push_back(map);
                 map.erase(id_);
+                id_ = offset = "";
             }
         }
         catch (...){
@@ -173,9 +181,14 @@ public:
                         return;
                     }
                 }
+                else{
+                    // make new index file and write it
+                    makeNewIndexFile(f);
+                }
+            }else{
+                // make new index file and write it
+                makeNewIndexFile(f);
             }
-            // make new index file and write it
-            makeNewIndexFile(f);
         }
         else{
             cerr << "Error Happen While Load Index In Memory." << endl;
