@@ -1,9 +1,19 @@
 #include "Application.cpp"
 #include "Author/AuthorPrimaryIndex.cpp"
+#include "Author/AuthorDataFile.cpp"
 int main() {
-    Application application = Application();
-    application.run();
+    int offset;
+    Author * author = AuthorDataFile::linear_search_ID("20210375", offset);
 
+    fstream f;
+    f.open(AuthorDataFile::getFileName(), ios::in | ios::out);
+
+
+    AuthorDataFile::deletePart(f, offset, author->getLengthOfRecord());
+    cout << "FUCK" << endl;
+
+//    Application application = Application();
+//    application.run();
 
 //    AuthorData authorData = AuthorData();
 ////    Author author = Author("ID", "Name", "Address");

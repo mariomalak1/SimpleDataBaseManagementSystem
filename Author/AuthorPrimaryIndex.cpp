@@ -198,7 +198,11 @@ public:
 
     Author * search(string id){
         Author * author;
+        if (vec.empty()){
+            loadIndex();
+        }
         int index = binarySearchInVector(vec, id);
+
         if (index != -1){
             fstream f;
             f.open(AuthorDataFile::getFileName(), ios::in);

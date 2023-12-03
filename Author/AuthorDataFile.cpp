@@ -268,6 +268,43 @@ public:
     static bool addAuthor(Author &author, int &authorOffset);
 
     static Author * linear_search_ID(string id, int & AuthorOffset);
+
+    // this part can be an author or part from author
+    // *-1|<deleted part size> ---- anything after it
+    static bool deletePart(fstream &file, int offset, int partLength){
+        if(file.is_open()){
+            // check if can
+            string stringPartLength = to_string(partLength);
+
+            // check if it is small part will ignore it and will not put in avail list
+            // if length of the remaining part is smaller than length of (length of record as string) + (length of | *) and length of -1 as string
+            if (partLength < (stringPartLength.length() + 4)){
+                return false;
+            }
+
+            // check if can delete this part, or it is small one
+            bool cond = AuthorHeader::changePointerLastNodeAvailList(file, offset);
+            file.seekp(offset);
+            // put delete mark
+            file.put('*');
+
+            if(!cond){
+                file << "|" << stringPartLength;
+            }
+            else{
+                file << to_string(offset) << "|" << stringPartLength;
+            }
+        }else{
+            cerr << "Error While Deleting From Delete Part Function in Author Data File" << endl;
+        }
+    }
+
+    // can be added with negative or positive value
+    static void updateNumOfRecordsInHeader(fstream file, int addNumRecords){
+        if(addNumRecords){
+            AuthorHeader::updateHeaderRecord(file, addNumRecords);
+        }
+    }
 };
 
 const string AuthorDataFile::FileName = "Data\\Author.txt";
@@ -281,12 +318,6 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
     checkFileIsFirstOpen(file);
 
     AuthorHeader::readHeaderRecord(file);
-
-    // check that no id entered before as this id from index or linear search
-    if(linear_search_ID(author.getID(), authorOffset) != nullptr){
-        cerr << "You can't add id that entered before" << endl;
-        return false;
-    }
 
     int recordLength = author.getLengthOfRecord();
     int suitableOffsetIfFound = availList(recordLength, file);

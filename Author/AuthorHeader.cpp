@@ -211,6 +211,51 @@ public:
         }
         writeHeader(file);
     }
+
+    static bool changePointerLastNodeAvailList(fstream &file, int lastNodeOffset){
+        string stringLastNodeOffset = to_string(lastNodeOffset);
+
+        vector<map<int, int>> vec = AvailList(file);
+
+        if (vec.empty()){
+            availList = stringLastNodeOffset;
+            updateHeaderRecord(file);
+        }
+        else{
+            map<int, int> map = vec[vec.size()];
+            file.seekp(map.begin()->first + 1, ios::cur);
+
+            // check that the length of offset is equal -1
+            if (stringLastNodeOffset.length() == 2){
+                file << stringLastNodeOffset;
+            }else {
+                // get length of current record
+                char c;
+                // seek to the length of record
+                file.seekg(3, ios::cur);
+                string beforeLastNodeLength;
+                while (!file.eof()){
+                    c = file.get();
+                    if ((c >= 48 and c <= 57)){
+                        beforeLastNodeLength += c;
+                    }
+                    else{
+                        break;
+                    }
+                }
+
+                string recordAfterModification = "*" + stringLastNodeOffset + "|" + beforeLastNodeLength;
+
+                if (beforeLastNodeLength.length() <  recordAfterModification.length()){
+                    return false;
+                }
+
+                // return to the first char in record -> *
+                file.seekp(-(3 + beforeLastNodeLength.length()));
+                file << recordAfterModification;
+            }
+        }
+    }
 };
 char AuthorHeader::lastUpdated[AuthorHeader::DATE_TIME_SIZE];
 string AuthorHeader::availList = "";
