@@ -282,21 +282,25 @@ public:
                 return false;
             }
 
+
             // check if can delete this part, or it is small one
             bool cond = AuthorHeader::changePointerLastNodeAvailList(file, offset);
+
             file.seekp(offset);
             // put delete mark
             file.put('*');
 
-            if(!cond){
-                file << "|" << stringPartLength;
+            if(cond){
+                file << to_string(offset) << "|" << stringPartLength;
             }
             else{
-                file << to_string(offset) << "|" << stringPartLength;
+                file << "|" << stringPartLength;
             }
         }else{
             cerr << "Error While Deleting From Delete Part Function in Author Data File" << endl;
+            return false;
         }
+        return true;
     }
 
     // can be added with negative or positive value

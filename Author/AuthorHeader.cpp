@@ -18,10 +18,8 @@ using namespace std;
 
 class AuthorHeader{
 private:
-    static const int DATE_TIME_SIZE = 19;
-
     static string numRecords;
-    static char lastUpdated[DATE_TIME_SIZE]; // date and time
+    static string dataTime; // date and time
     static string availList;
 
     static void parseHeader(string header){
@@ -40,21 +38,6 @@ private:
 
         availList = availListPointer;
 
-        // last updated date and time
-        while (true){
-            if (header[i] >= 48 and header[i] <= 57){
-                update += header[i];
-                i++;
-            }
-            else{
-                break;
-            }
-        }
-        // copy date and time in lastUpdated
-        strncpy(lastUpdated, update.c_str(), DATE_TIME_SIZE - 1);
-        lastUpdated[DATE_TIME_SIZE - 1] = '\0';
-
-
         // number of records
         i++;
         string numberRecords;
@@ -68,6 +51,20 @@ private:
             }
         }
         numRecords = numberRecords;
+
+        i++;
+        // last updated date and time
+        while (true){
+            if (header[i] != '|'){
+                update += header[i];
+                i++;
+            }
+            else{
+                break;
+            }
+        }
+
+        dataTime = update;
     }
 
     static void setUpdatedDateTime(){
@@ -80,17 +77,20 @@ private:
 
         ostringstream oss;
         oss << std::put_time(localTime, "%Y-%m-%d %H:%M:%S");
-        std::string formattedTime = oss.str();
 
-        // copy date and time in lastUpdated
-        strncpy(lastUpdated, formattedTime.c_str(), DATE_TIME_SIZE - 1);
-        lastUpdated[DATE_TIME_SIZE - 1] = '\0';
+        // Extract the seconds and format with leading zero
+        std::string formattedSeconds = oss.str().substr(17, 2);
+        int seconds = std::stoi(formattedSeconds);
+        oss.seekp(17);  // Move the output stream position to the seconds part
+        oss << std::setw(2) << std::setfill('0') << seconds;
+
+        dataTime = oss.str();
     }
 
     // function to write header content to file
     static void writeHeader(fstream &file){
         file.seekp(0,ios::beg);
-        file << availList << '|' << numRecords << '|' << lastUpdated << '|' <<'\n';
+        file << availList << '|' << numRecords << '|' << dataTime << '|' <<'\n';
     }
 
     // function to make header that it first time to create it
@@ -179,7 +179,7 @@ public:
         // update header data
         AuthorHeader::readHeaderRecord(f);
         // length of header + delimiter + '\n'
-        return (DATE_TIME_SIZE) + (availList.length()) + (numRecords.length()) + 3 + 1;
+        return (dataTime.length()) + (availList.length()) + (numRecords.length()) + 4;
     }
 
     static void readHeaderRecord(fstream &file){
@@ -209,6 +209,7 @@ public:
                 numRecords = to_string(numRecords_);
             }
         }
+        cout << " where after first seekp in change last node: " << file.tellp() << endl;
         writeHeader(file);
     }
 
@@ -220,10 +221,12 @@ public:
         if (vec.empty()){
             availList = stringLastNodeOffset;
             updateHeaderRecord(file);
+            cout << "availList : " <<  AuthorHeader::availList << "   numRecords : " <<  AuthorHeader::numRecords << "  date time : " <<  AuthorHeader::dataTime << endl;
         }
         else{
             map<int, int> map = vec[vec.size()];
             file.seekp(map.begin()->first + 1, ios::cur);
+
 
             // check that the length of offset is equal -1
             if (stringLastNodeOffset.length() == 2){
@@ -253,12 +256,13 @@ public:
                 // return to the first char in record -> *
                 file.seekp(-(3 + beforeLastNodeLength.length()));
                 file << recordAfterModification;
+                return true;
             }
         }
     }
 };
-char AuthorHeader::lastUpdated[AuthorHeader::DATE_TIME_SIZE];
 string AuthorHeader::availList = "";
+string AuthorHeader::dataTime = "";
 string AuthorHeader::numRecords = "";
 
-#endif SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORHEADER_H
+#endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORHEADER_H
