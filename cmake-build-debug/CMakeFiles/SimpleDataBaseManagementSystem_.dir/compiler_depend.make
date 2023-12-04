@@ -186,9 +186,7 @@ CMakeFiles/SimpleDataBaseManagementSystem_.dir/main.cpp.obj: ../main.cpp \
   D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/stl_heap.h \
   D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/stl_tempbuf.h \
   D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/uniform_int_dist.h \
-  ../Author/AuthorPrimaryIndex.cpp \
-  ../Author/AuthorPrimaryIndex.cpp \
-  ../Author/AuthorDataFile.cpp
+  ../Author/AuthorPrimaryIndex.cpp
 
 
 ../main.cpp:

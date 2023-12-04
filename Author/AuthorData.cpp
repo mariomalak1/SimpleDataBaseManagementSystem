@@ -18,6 +18,7 @@ public:
         authorPrimaryIndex->loadIndex();
         authorPrimaryIndex->setFlagOn();
 
+
         // get the data from the user
         Author author = Author::getValidAuthorDataFromUser();
         int authorOffset;

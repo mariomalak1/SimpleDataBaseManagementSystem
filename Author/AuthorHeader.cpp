@@ -19,10 +19,35 @@ using namespace std;
 class AuthorHeader{
 private:
     static const int DATE_TIME_SIZE = 20;
+    static const int NUM_RECORD_SIZE = 9;
+    static const int AVAIL_LIST_SIZE = 9;
 
-    static string numRecords;
     static char lastUpdated[DATE_TIME_SIZE]; // date and time
-    static string availList;
+    static char numRecords[NUM_RECORD_SIZE]; // number of records
+    static char availList[AVAIL_LIST_SIZE]; // avail list pointer
+
+    // to check that array of chars is empty or not
+    static bool isCharArrayEmpty(const char* charArray) {
+        return charArray[0] == '\0';
+    }
+
+    static void copyStringToArray(const string& inputString, char* outputArray, int arraySize) {
+        strncpy(outputArray, inputString.c_str(), arraySize - 1);
+        outputArray[arraySize - 1] = '\0'; // Ensure null-termination
+    }
+
+    // function to format the string to put zero's
+    // know that it treat as will copy in array of chars -> will minus width with -1
+    static string formatString(int number, int width){
+        ostringstream oss;
+        if (number < 0) {
+            oss << '-';
+            number = -number;
+            width -= 1;
+        }
+        oss << setw(width - 1) << setfill('0') << number;
+        return oss.str();
+    }
 
     static void parseHeader(string header){
         // put avail list pointer
@@ -37,8 +62,9 @@ private:
                 break;
             }
         }
-
-        availList = availListPointer;
+        int intAvailListPointer = stoi(availListPointer);
+        string str1 = formatString(stoi(availListPointer), AVAIL_LIST_SIZE);
+        copyStringToArray(str1, availList, AVAIL_LIST_SIZE);
 
         // number of records
         i++;
@@ -52,22 +78,19 @@ private:
                 break;
             }
         }
-        numRecords = numberRecords;
+
+        str1 = formatString(stoi(numberRecords), NUM_RECORD_SIZE);
+        copyStringToArray(str1, numRecords, NUM_RECORD_SIZE);
 
         i++;
         // last updated date and time
-        while (true){
-            if (header[i] >= 48 and header[i] <= 57){
-                update += header[i];
-                i++;
-            }
-            else{
-                break;
-            }
+        while (i != header.length()){
+            update += header[i];
+            i++;
         }
+
         // copy date and time in lastUpdated
-        strncpy(lastUpdated, update.c_str(), DATE_TIME_SIZE - 1);
-        lastUpdated[DATE_TIME_SIZE - 1] = '\0';
+        copyStringToArray(update.c_str(), lastUpdated, DATE_TIME_SIZE);
     }
 
     static void setUpdatedDateTime(){
@@ -83,15 +106,15 @@ private:
 
         // Extract the seconds and format with leading zero
         string formattedSeconds = oss.str().substr(17, 2);
-        int seconds = std::stoi(formattedSeconds);
+        int seconds = stoi(formattedSeconds);
         // Move the output stream position to the seconds part
         oss.seekp(17);
-        oss << std::setw(2) << std::setfill('0') << seconds;
+        oss << setw(2) << setfill('0') << seconds;
 
         string formattedTime = oss.str();
+
         // copy date and time in lastUpdated
-        strncpy(lastUpdated, formattedTime.c_str(), DATE_TIME_SIZE - 1);
-        lastUpdated[DATE_TIME_SIZE - 1] = '\0';
+        copyStringToArray(formattedTime.c_str(), lastUpdated, DATE_TIME_SIZE);
     }
 
     // function to write header content to file
@@ -103,10 +126,12 @@ private:
     // function to make header that it first time to create it
     static void makeHeader(fstream &file){
         // avail list
-        availList = "-1";
+        string str1 = formatString(-1, AVAIL_LIST_SIZE);
+        copyStringToArray(str1, availList, AVAIL_LIST_SIZE);
 
         // number of records
-        numRecords = "0";
+        str1 = formatString(0, NUM_RECORD_SIZE);
+        copyStringToArray(str1, numRecords, NUM_RECORD_SIZE);
 
         // data and time
         setUpdatedDateTime();
@@ -122,8 +147,8 @@ public:
         int availListPointer = (AuthorHeader::getFirstNodeAvailList());
 
         vector<map<int, int>> vectorOfNodes;
-
-        try {
+        cout << availListPointer << endl;
+//        try {
             while (true) {
                 if (availListPointer == -1) {
                     return vectorOfNodes;
@@ -138,27 +163,34 @@ public:
                 f.seekg(1, ios::cur);
 
                 // to parse the next pointer record offset
+                cout << "nextNodePointer :  ";
                 while (true) {
                     f.get(c);
-                    if (c >= 48 and c <= 57) {
+                    cout << c;
+                    if (c >= 48 and c <= 57 || (c == '-')) {
                         nextNodePointer += c;
                     } else {
                         break;
                     }
                 }
+                cout << endl;
 
-                // to move after | delimiter
-                f.seekg(1, ios::cur);
-
+                cout << "size of record : ";
                 // to parse the size of record
                 while (true) {
                     f.get(c);
+                    cout << c;
                     if (c >= 48 and c <= 57) {
                         sizeOfRecordInAvailList += c;
                     } else {
                         break;
                     }
                 }
+                cout << endl;
+
+                cout << "sizeOfRecordInAvailList : " << sizeOfRecordInAvailList << endl;
+                cout << "nextNodePointer : " << sizeOfRecordInAvailList << endl;
+
                 int recordLength = stoi(sizeOfRecordInAvailList);
 
                 map.insert(make_pair(recordLength, availListPointer));
@@ -167,17 +199,19 @@ public:
 
                 vectorOfNodes.push_back(map);
             }
-        }
-        catch(...){
-            return vectorOfNodes;
-        }
+//        }
+//        catch(...){
+//            return vectorOfNodes;
+//        }
     }
 
     static int getFirstNodeAvailList(){
-        if (availList.empty()){
-            availList = "-1";
+        if (isCharArrayEmpty(availList)){
+            string string1 = formatString(-1, AVAIL_LIST_SIZE);
+            copyStringToArray(string1, availList, AVAIL_LIST_SIZE);
             return -1;
         }else{
+            cout << "availList : " << availList << endl;
             return stoi(availList);
         }
     }
@@ -186,7 +220,7 @@ public:
         // update header data
         AuthorHeader::readHeaderRecord(f);
         // length of header + delimiter + '\n'
-        return (DATE_TIME_SIZE) + (availList.length()) + (numRecords.length()) + 3 + 1;
+        return strlen(availList) + strlen(numRecords) + strlen(lastUpdated) + 4;
     }
 
     static void readHeaderRecord(fstream &file){
@@ -213,7 +247,8 @@ public:
             if(addNumberOfRecords){
                 int numRecords_ = stoi(numRecords);
                 numRecords_ += addNumberOfRecords;
-                numRecords = to_string(numRecords_);
+                string string1 = formatString(numRecords_, NUM_RECORD_SIZE);
+                copyStringToArray(string1, numRecords, NUM_RECORD_SIZE);
             }
         }
         writeHeader(file);
@@ -224,8 +259,17 @@ public:
 
         vector<map<int, int>> vec = AvailList(file);
 
+        cout << "Print Vector in Change Pointer in Avail List" << endl;
+
+        for (int i = 0; i < vec.size(); ++i) {
+            cout << vec[i].begin()->first << "  :  " << vec[i].begin()->second << endl;
+        }
+
+        cout << "End Print Vector in Change Pointer in Avail List" << endl;
+
+
         if (vec.empty()){
-            availList = stringLastNodeOffset;
+            copyStringToArray(formatString(stoi(stringLastNodeOffset), AVAIL_LIST_SIZE), availList, AVAIL_LIST_SIZE);
             updateHeaderRecord(file);
         }
         else{
@@ -265,7 +309,7 @@ public:
     }
 };
 char AuthorHeader::lastUpdated[AuthorHeader::DATE_TIME_SIZE];
-string AuthorHeader::availList = "";
-string AuthorHeader::numRecords = "";
+char AuthorHeader::availList[AuthorHeader::AVAIL_LIST_SIZE];
+char AuthorHeader::numRecords[AuthorHeader::NUM_RECORD_SIZE];
 
-#endif SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORHEADER_H
+#endif // SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORHEADER_H

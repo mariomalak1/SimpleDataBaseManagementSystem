@@ -1,18 +1,48 @@
 #include "Application.cpp"
-#include "Author/AuthorPrimaryIndex.cpp"
-#include "Author/AuthorDataFile.cpp"
+
 int main() {
-    int offset;
-    Author * author = AuthorDataFile::linear_search_ID("20210313", offset);
-
-    fstream f;
-    f.open(AuthorDataFile::getFileName(), ios::in | ios::out);
-
-
-    AuthorDataFile::deletePart(f, offset, author->getLengthOfRecord());
-    cout << "mario" << endl;
 //    Application application = Application();
 //    application.run();
+
+    string id;
+    int offset;
+
+
+//    // search with id in primary index
+//    AuthorData authorData = AuthorData();
+//    while (true){
+//        getline(cin, id);
+//        if (id == "-1"){
+//            break;
+//        }
+//        Author * author = authorData.searchWithID(id);
+//        if (author != nullptr){
+//            cout << *author << endl;
+//        }
+//    }
+
+
+    while (true){
+        getline(cin, id);
+        if (id == "-1"){
+            exit(0);
+        }
+        Author * author = AuthorDataFile::linear_search_ID(id, offset);
+
+        if (author != nullptr){
+            fstream f;
+            f.open(AuthorDataFile::getFileName(), ios::in | ios::out);
+
+            cout << "Offset " << offset << " : " << "id : " << id << endl;
+            cout << *author << endl;
+
+            cout << AuthorDataFile::deletePart(f, offset, author->getLengthOfRecord()) << endl;
+        }
+        else{
+            cout << "No ID = " << id << endl;
+        }
+    }
+    cout << "mario" << endl;
 
 //    AuthorData authorData = AuthorData();
 ////    Author author = Author("ID", "Name", "Address");

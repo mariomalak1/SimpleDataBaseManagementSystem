@@ -23,8 +23,12 @@ private:
     }
 
     void readFileDataPutInMemory(fstream &dataFile){
+        // check if the data file is first once open
+        AuthorDataFile::checkFileIsFirstOpen(dataFile);
+
         int offset = AuthorHeader::HeaderLength(dataFile);
         map<string, int> map;
+        cout << "offset of header after update : " << offset << endl;
 
         while (true){
             Author * author = AuthorDataFile::readAuthor(dataFile, offset);
@@ -49,6 +53,8 @@ private:
         // put all data in data file
         readFileDataPutInMemory(dataFile);
 
+        cout << "After Read" << endl;
+
         // sort index
         sortIndex();
 
@@ -72,9 +78,9 @@ private:
             string id_, offset;
             int intOffset;
 
-            while (true) {
+            while (!f.eof()) {
                 // to parse the next id record
-                while (true) {
+                while (!f.eof()) {
                     f.get(c);
                     if (c == '\n'){
                         continue;
@@ -87,7 +93,7 @@ private:
                 }
 
                 // to parse the next offset of record
-                while (true) {
+                while (!f.eof()) {
                     f.get(c);
                     if (c >= 48 and c <= 57) {
                         offset += c;
@@ -202,6 +208,7 @@ public:
             loadIndex();
         }
         int index = binarySearchInVector(vec, id);
+
 
         if (index != -1){
             fstream f;
