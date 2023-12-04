@@ -15,7 +15,7 @@ int main() {
 
     cout << "Offset : " <<  offset << endl;
     cout << AuthorDataFile::deletePart(f, offset, author->getLengthOfRecord()) << endl;
-
+    cout << "mario " << endl;
 //    Application application = Application();
 //    application.run();
 
