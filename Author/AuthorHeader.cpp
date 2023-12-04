@@ -18,7 +18,7 @@ using namespace std;
 
 class AuthorHeader{
 private:
-    static const int DATE_TIME_SIZE = 19;
+    static const int DATE_TIME_SIZE = 20;
 
     static string numRecords;
     static char lastUpdated[DATE_TIME_SIZE]; // date and time
@@ -40,21 +40,6 @@ private:
 
         availList = availListPointer;
 
-        // last updated date and time
-        while (true){
-            if (header[i] >= 48 and header[i] <= 57){
-                update += header[i];
-                i++;
-            }
-            else{
-                break;
-            }
-        }
-        // copy date and time in lastUpdated
-        strncpy(lastUpdated, update.c_str(), DATE_TIME_SIZE - 1);
-        lastUpdated[DATE_TIME_SIZE - 1] = '\0';
-
-
         // number of records
         i++;
         string numberRecords;
@@ -68,20 +53,42 @@ private:
             }
         }
         numRecords = numberRecords;
+
+        i++;
+        // last updated date and time
+        while (true){
+            if (header[i] >= 48 and header[i] <= 57){
+                update += header[i];
+                i++;
+            }
+            else{
+                break;
+            }
+        }
+        // copy date and time in lastUpdated
+        strncpy(lastUpdated, update.c_str(), DATE_TIME_SIZE - 1);
+        lastUpdated[DATE_TIME_SIZE - 1] = '\0';
     }
 
     static void setUpdatedDateTime(){
-        chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        chrono::system_clock::time_point now = chrono::system_clock::now();
         // Convert the system time point to a time_t object
-        time_t currentTime = std::chrono::system_clock::to_time_t(now);
+        time_t currentTime = chrono::system_clock::to_time_t(now);
 
         // Convert the time_t object to a local time struct
-        tm* localTime = std::localtime(&currentTime);
+        tm* localTime = localtime(&currentTime);
 
         ostringstream oss;
-        oss << std::put_time(localTime, "%Y-%m-%d %H:%M:%S");
-        std::string formattedTime = oss.str();
+        oss << put_time(localTime, "%Y-%m-%d %H:%M:%S");
 
+        // Extract the seconds and format with leading zero
+        string formattedSeconds = oss.str().substr(17, 2);
+        int seconds = std::stoi(formattedSeconds);
+        // Move the output stream position to the seconds part
+        oss.seekp(17);
+        oss << std::setw(2) << std::setfill('0') << seconds;
+
+        string formattedTime = oss.str();
         // copy date and time in lastUpdated
         strncpy(lastUpdated, formattedTime.c_str(), DATE_TIME_SIZE - 1);
         lastUpdated[DATE_TIME_SIZE - 1] = '\0';

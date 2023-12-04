@@ -4,18 +4,13 @@
 int main() {
     int offset;
     Author * author = AuthorDataFile::linear_search_ID("20210313", offset);
-    if (author != nullptr){
-        cout << *author << endl;
-    }else{
-        cout << "sad" << endl;
-        exit(0);
-    }
+
     fstream f;
     f.open(AuthorDataFile::getFileName(), ios::in | ios::out);
 
-    cout << "Offset : " <<  offset << endl;
-    cout << AuthorDataFile::deletePart(f, offset, author->getLengthOfRecord()) << endl;
-    cout << "mario " << endl;
+
+    AuthorDataFile::deletePart(f, offset, author->getLengthOfRecord());
+    cout << "mario" << endl;
 //    Application application = Application();
 //    application.run();
 
