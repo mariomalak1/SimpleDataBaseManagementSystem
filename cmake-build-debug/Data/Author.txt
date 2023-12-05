@@ -1,2 +1,1 @@
--0000001|00000004|2023-12-05 01:44:58|
-35mario malak alabd|20210313|address|31mahmoud sayed|20210375|address|28asdasdasd|202145454|address|26asasdasd|20210505|address|
+00000140|00000004|2023-12-05 03:04:48|*-1|36|o malak alabd|20210313|address|*39|31|ud sayed|20210375|address|28asdasdasd|202145454|address|*77|26|asd|20210505|address|

@@ -147,7 +147,6 @@ public:
         int availListPointer = (AuthorHeader::getFirstNodeAvailList());
 
         vector<map<int, int>> vectorOfNodes;
-        cout << availListPointer << endl;
 //        try {
             while (true) {
                 if (availListPointer == -1) {
@@ -211,7 +210,6 @@ public:
             copyStringToArray(string1, availList, AVAIL_LIST_SIZE);
             return -1;
         }else{
-            cout << "availList : " << availList << endl;
             return stoi(availList);
         }
     }
@@ -273,8 +271,9 @@ public:
             updateHeaderRecord(file);
         }
         else{
-            map<int, int> map = vec[vec.size()];
-            file.seekp(map.begin()->first + 1, ios::cur);
+            map<int, int> map = vec[vec.size() - 1];
+            file.seekp(map.begin()->second + 1, ios::beg);
+
 
             // check that the length of offset is equal -1
             if (stringLastNodeOffset.length() == 2){
@@ -295,9 +294,9 @@ public:
                     }
                 }
 
-                string recordAfterModification = "*" + stringLastNodeOffset + "|" + beforeLastNodeLength;
+                string recordAfterModification = "*" + stringLastNodeOffset + "|" + beforeLastNodeLength + "|";
 
-                if (beforeLastNodeLength.length() <  recordAfterModification.length()){
+                if (beforeLastNodeLength.length() <= recordAfterModification.length()){
                     return false;
                 }
 

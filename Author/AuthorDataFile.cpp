@@ -284,15 +284,18 @@ public:
 
             // check if can delete this part, or it is small one
             bool cond = AuthorHeader::changePointerLastNodeAvailList(file, offset);
+
+            cout << cond << endl;
+
             file.seekp(offset);
             // put delete mark
             file.put('*');
 
-            if(!cond){
-                file << "|" << stringPartLength;
+            if(cond){
+                file << "-1" << "|" << stringPartLength << "|";
             }
             else{
-                file << to_string(offset) << "|" << stringPartLength;
+                file << "|" << stringPartLength << "|";
             }
         }else{
             cerr << "Error While Deleting From Delete Part Function in Author Data File" << endl;
