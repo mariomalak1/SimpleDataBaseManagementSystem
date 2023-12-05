@@ -66,7 +66,8 @@ private:
             string id;
             cout << "Enter Author ID : ";
             cin >> id;
-            Author * author = authorData->searchWithID(id);
+            int offset;
+            Author * author = authorData->searchWithID(id, offset);
             if (author != nullptr){
                 cout << *author << endl;
             }

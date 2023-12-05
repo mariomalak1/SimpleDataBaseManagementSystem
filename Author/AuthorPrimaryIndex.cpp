@@ -169,16 +169,6 @@ public:
         indexState = "OFF";
     }
 
-    void getOffsetOfAuthor(int &offset, string ID){
-        for (int i = 0; i < vec.size(); ++i) {
-            if (vec[i].begin()->first == ID){
-                offset = vec[i].begin()->second;
-                return;
-            }
-        }
-        offset = -1;
-    }
-
     void loadIndex(){
         fstream f;
         f.open(getFileName(), ios::out | ios::in);
@@ -210,7 +200,7 @@ public:
 
     }
 
-    Author * search(string id){
+    Author * search(string id, int &offset){
         Author * author;
         if (vec.empty()){
             loadIndex();
@@ -222,10 +212,11 @@ public:
             fstream f;
             f.open(AuthorDataFile::getFileName(), ios::in);
 
-            int offset = vec[index].begin()->second;
+            offset = vec[index].begin()->second;
             author = AuthorDataFile::readAuthor(f,offset);
             return author;
         }
+        offset = -1;
         return nullptr;
     }
 
@@ -274,7 +265,6 @@ public:
         } else {
             return false;
         }
-        return false;
     }
 
     // must put indexState with a value

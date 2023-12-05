@@ -23,7 +23,8 @@ public:
         int authorOffset;
 
         // check that no id entered before as this id from index
-        if(searchWithID(author.getID()) != nullptr){
+        int offset;
+        if(searchWithID(author.getID(), offset) != nullptr){
             cerr << "You can't add id that entered before" << endl;
             return false;
         }
@@ -41,19 +42,17 @@ public:
         }
     }
 
-    Author * searchWithID(string ID){
-        return authorPrimaryIndex->search(ID);
+    Author * searchWithID(string ID, int &offset){
+        return authorPrimaryIndex->search(ID, offset);
     }
 
     bool deleteAuthor(string ID){
-        Author * author = searchWithID(ID);
+        int offset;
+        Author * author = searchWithID(ID, offset);
         if (author == nullptr){
             cerr << "No Author With ID : " << ID << endl;
             return false;
         }else{
-            int offset = 0;
-            authorPrimaryIndex->getOffsetOfAuthor(offset, ID);
-            if (offset != -1){
                 // delete all books with this author id -> with all indexes for books
 
                 // delete from the data file
@@ -68,11 +67,6 @@ public:
                 // delete the author from all index files -->
                 AuthorDataFile::updateNumOfRecordsInHeader(dataFile, -1);
                 return true;
-            }
-            else{
-                cout << "Error While Delete Author" << endl;
-                return false;
-            }
         }
 
     }
