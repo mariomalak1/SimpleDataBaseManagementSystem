@@ -9,6 +9,7 @@ private:
     AuthorPrimaryIndex * authorPrimaryIndex;
     AuthorDataFile authorData;
 public:
+
     AuthorData(){
         authorPrimaryIndex = new AuthorPrimaryIndex();
     }
@@ -23,8 +24,7 @@ public:
         int authorOffset;
 
         // check that no id entered before as this id from index
-        int offset;
-        if(searchWithID(author.getID(), offset) != nullptr){
+        if(searchWithID(author.getID(), authorOffset) != nullptr){
             cerr << "You can't add id that entered before" << endl;
             return false;
         }
@@ -47,28 +47,39 @@ public:
     }
 
     bool deleteAuthor(string ID){
-        int offset;
+        int offset = 0;
         Author * author = searchWithID(ID, offset);
         if (author == nullptr){
             cerr << "No Author With ID : " << ID << endl;
             return false;
-        }else{
-                // delete all books with this author id -> with all indexes for books
-
-                // delete from the data file
-                fstream dataFile;
-                dataFile.open(AuthorDataFile::getFileName(), ios::in|ios::out);
-
-                AuthorDataFile::deletePart(dataFile, offset, author->getLengthOfRecord());
-
-                // delete from index
-                authorPrimaryIndex->deleteAuthor(ID);
-
-                // delete the author from all index files -->
-                AuthorDataFile::updateNumOfRecordsInHeader(dataFile, -1);
-                return true;
         }
 
+        // delete all books with this author id -> with all indexes for books
+
+
+        // delete from the data file
+        fstream dataFile;
+        dataFile.open(AuthorDataFile::getFileName(), ios::in|ios::out);
+
+        bool deleted = AuthorDataFile::deletePart(dataFile, offset, author->getLengthOfRecord());
+
+        if (deleted){
+            authorPrimaryIndex->deleteAuthor(ID);
+            // delete the author from all index files -->
+            AuthorDataFile::updateNumOfRecordsInHeader(dataFile, -1);
+            return true;
+        }
+        else {
+            return false;
+        }
+
+        // delete all books with this author id -> with all indexes for books
+
+        // delete the author from file
+
+        // delete the author from all index files
+
+        return true;
     }
 };
 

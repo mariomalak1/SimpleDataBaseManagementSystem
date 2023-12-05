@@ -148,47 +148,56 @@ public:
 
         vector<map<int, int>> vectorOfNodes;
 //        try {
-            while (true) {
-                if (availListPointer == -1) {
-                    return vectorOfNodes;
-                }
-
-                char c;
-                map<int, int> map;
-                string sizeOfRecordInAvailList, nextNodePointer;
-                f.seekg(availListPointer);
-
-                // to move after *
-                f.seekg(1, ios::cur);
-
-                // to parse the next pointer record offset
-                while (true) {
-                    f.get(c);
-                    if (c >= 48 and c <= 57 || (c == '-')) {
-                        nextNodePointer += c;
-                    } else {
-                        break;
-                    }
-                }
-
-                // to parse the size of record
-                while (true) {
-                    f.get(c);
-                    if (c >= 48 and c <= 57) {
-                        sizeOfRecordInAvailList += c;
-                    } else {
-                        break;
-                    }
-                }
-
-                int recordLength = stoi(sizeOfRecordInAvailList);
-
-                map.insert(make_pair(recordLength, availListPointer));
-
-                availListPointer = stoi(nextNodePointer);
-
-                vectorOfNodes.push_back(map);
+        while (true) {
+            if (availListPointer == -1) {
+                return vectorOfNodes;
             }
+
+            char c;
+            map<int, int> map;
+            string sizeOfRecordInAvailList, nextNodePointer;
+            f.seekg(availListPointer);
+
+            // to move after *
+            f.seekg(1, ios::cur);
+
+            // to parse the next pointer record offset
+            cout << "nextNodePointer :  ";
+            while (true) {
+                f.get(c);
+                cout << c;
+                if (c >= 48 and c <= 57 || (c == '-')) {
+                    nextNodePointer += c;
+                } else {
+                    break;
+                }
+            }
+            cout << endl;
+
+            cout << "size of record : ";
+            // to parse the size of record
+            while (true) {
+                f.get(c);
+                cout << c;
+                if (c >= 48 and c <= 57) {
+                    sizeOfRecordInAvailList += c;
+                } else {
+                    break;
+                }
+            }
+            cout << endl;
+
+            cout << "sizeOfRecordInAvailList : " << sizeOfRecordInAvailList << endl;
+            cout << "nextNodePointer : " << sizeOfRecordInAvailList << endl;
+
+            int recordLength = stoi(sizeOfRecordInAvailList);
+
+            map.insert(make_pair(recordLength, availListPointer));
+
+            availListPointer = stoi(nextNodePointer);
+
+            vectorOfNodes.push_back(map);
+        }
 //        }
 //        catch(...){
 //            return vectorOfNodes;
