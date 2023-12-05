@@ -1,12 +1,8 @@
 #include "Application.cpp"
 
 int main() {
-//    Application application = Application();
-//    application.run();
-
-    string id;
-    int offset;
-
+    Application application = Application();
+    application.run();
 
 //    // search with id in primary index
 //    AuthorData authorData = AuthorData();
@@ -21,28 +17,16 @@ int main() {
 //        }
 //    }
 
-
+    string id;
+    AuthorData authorData = AuthorData();
     while (true){
         getline(cin, id);
         if (id == "-1"){
             exit(0);
         }
-        Author * author = AuthorDataFile::linear_search_ID(id, offset);
 
-        if (author != nullptr){
-            fstream f;
-            f.open(AuthorDataFile::getFileName(), ios::in | ios::out);
-
-            cout << "Offset " << offset << " : " << "id : " << id << endl;
-            cout << *author << endl;
-
-            cout << AuthorDataFile::deletePart(f, offset, author->getLengthOfRecord()) << endl;
-        }
-        else{
-            cout << "No ID = " << id << endl;
-        }
+        cout << authorData.deleteAuthor(id) << endl;
     }
-    cout << "mario" << endl;
 
 //    AuthorData authorData = AuthorData();
 ////    Author author = Author("ID", "Name", "Address");

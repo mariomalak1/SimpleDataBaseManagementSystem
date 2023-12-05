@@ -285,13 +285,12 @@ public:
             // check if can delete this part, or it is small one
             bool cond = AuthorHeader::changePointerLastNodeAvailList(file, offset);
 
-            cout << cond << endl;
-
             file.seekp(offset);
             // put delete mark
             file.put('*');
 
             if(cond){
+                cout << "mariooo" << endl;
                 file << "-1" << "|" << stringPartLength << "|";
             }
             else{

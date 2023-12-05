@@ -9,7 +9,6 @@ private:
     AuthorPrimaryIndex * authorPrimaryIndex;
     AuthorDataFile authorData;
 public:
-
     AuthorData(){
         authorPrimaryIndex = new AuthorPrimaryIndex();
     }
@@ -51,15 +50,31 @@ public:
         if (author == nullptr){
             cerr << "No Author With ID : " << ID << endl;
             return false;
+        }else{
+            int offset = 0;
+            authorPrimaryIndex->getOffsetOfAuthor(offset, ID);
+            if (offset != -1){
+                // delete all books with this author id -> with all indexes for books
+
+                // delete from the data file
+                fstream dataFile;
+                dataFile.open(AuthorDataFile::getFileName(), ios::in|ios::out);
+
+                AuthorDataFile::deletePart(dataFile, offset, author->getLengthOfRecord());
+
+                // delete from index
+                authorPrimaryIndex->deleteAuthor(ID);
+
+                // delete the author from all index files -->
+
+                return true;
+            }
+            else{
+                cout << "Error While Delete Author" << endl;
+                return false;
+            }
         }
 
-        // delete all books with this author id -> with all indexes for books
-
-        // delete the author from file
-
-        // delete the author from all index files
-
-        return true;
     }
 };
 

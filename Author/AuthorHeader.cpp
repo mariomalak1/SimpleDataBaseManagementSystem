@@ -162,33 +162,24 @@ public:
                 f.seekg(1, ios::cur);
 
                 // to parse the next pointer record offset
-                cout << "nextNodePointer :  ";
                 while (true) {
                     f.get(c);
-                    cout << c;
                     if (c >= 48 and c <= 57 || (c == '-')) {
                         nextNodePointer += c;
                     } else {
                         break;
                     }
                 }
-                cout << endl;
 
-                cout << "size of record : ";
                 // to parse the size of record
                 while (true) {
                     f.get(c);
-                    cout << c;
                     if (c >= 48 and c <= 57) {
                         sizeOfRecordInAvailList += c;
                     } else {
                         break;
                     }
                 }
-                cout << endl;
-
-                cout << "sizeOfRecordInAvailList : " << sizeOfRecordInAvailList << endl;
-                cout << "nextNodePointer : " << sizeOfRecordInAvailList << endl;
 
                 int recordLength = stoi(sizeOfRecordInAvailList);
 
@@ -256,15 +247,6 @@ public:
         string stringLastNodeOffset = to_string(lastNodeOffset);
 
         vector<map<int, int>> vec = AvailList(file);
-
-        cout << "Print Vector in Change Pointer in Avail List" << endl;
-
-        for (int i = 0; i < vec.size(); ++i) {
-            cout << vec[i].begin()->first << "  :  " << vec[i].begin()->second << endl;
-        }
-
-        cout << "End Print Vector in Change Pointer in Avail List" << endl;
-
 
         if (vec.empty()){
             copyStringToArray(formatString(stoi(stringLastNodeOffset), AVAIL_LIST_SIZE), availList, AVAIL_LIST_SIZE);

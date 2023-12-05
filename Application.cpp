@@ -52,6 +52,15 @@ private:
         }
         else if (response == "6"){
             // delete author with id
+            cin.ignore();
+            string ID;
+            cout << "Enter Author ID : ";
+            getline(cin, ID);
+            if (authorData->deleteAuthor(ID)){
+                cout << "Delete Author Done" << endl;
+            }else{
+                cout << "Can't Delete Author" << endl;
+            }
         }
         else if (response == "7"){
             string id;

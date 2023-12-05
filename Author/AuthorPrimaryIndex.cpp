@@ -10,6 +10,7 @@ class AuthorPrimaryIndex{
 private:
     string indexState;
     const string FileName = "Data\\Indexes\\AuthorPrimaryIndex.txt";
+
     // to check on the index is upto date or not
     bool checkIndexUpToDate(){
         // is off -> upto date
@@ -169,6 +170,16 @@ public:
     // make index file flag upto date
     void setFlagOff(){
         indexState = "OFF";
+    }
+
+    void getOffsetOfAuthor(int &offset, string ID){
+        for (int i = 0; i < vec.size(); ++i) {
+            if (vec[i].begin()->first == ID){
+                offset = vec[i].begin()->second;
+                return;
+            }
+        }
+        offset = -1;
     }
 
     void loadIndex(){
