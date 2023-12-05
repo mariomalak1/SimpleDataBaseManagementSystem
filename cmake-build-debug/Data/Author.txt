@@ -1,2 +1,2 @@
--0000001|00000004|2023-12-05 18:43:27|
-29mario malak|20210313|address|23asdasda|212121|dasasda|26ooaoaooa|isisisiis|rrrrrr|28kakkakak|llllalala|adddress|
+00000124|00000001|2023-12-05 19:01:16|
+*71|29| malak|20210313|address|*96|23|da|212121|dasasda|*-1|26|ooa|isisisiis|rrrrrr|*40|28|kak|llllalala|adddress|36mario malak alabd|20210313|address2|

@@ -204,7 +204,7 @@ public:
 
     Author * search(string id, int &offset){
         Author * author;
-        if (vec.empty()){
+        if (vec.empty() || !checkIndexUpToDate()){
             loadIndex();
         }
         int index = binarySearchInVector(vec, id);
