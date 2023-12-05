@@ -199,14 +199,39 @@ private:
         author.setAddress(const_cast<char *>(address.c_str()));
     }
 
-    static int readLengthIndicator(fstream &f, int index) {
+    // assume you after * char
+    static int readAvailNodePointer(fstream &f, bool &notAvailPointer){
+        char c;
+        string availNodePointer;
 
+        while (  (!f.eof()) ){
+            c = f.get();
+            if(c == '|'){
+                notAvailPointer = true;
+                return -1;
+            }
+            if (c == '-' or (c >= 48 && c <= 57)){
+                availNodePointer += c;
+            }else{
+                break;
+            }
+        }
+        notAvailPointer = false;
+        return stoi(availNodePointer);
+    }
+
+    static int readLengthIndicator(fstream &f, int index, bool &isDeleted) {
         f.seekg(index, ios::beg);
 
         string lengthIndicator = "";
         char ch;
         while (!f.eof() && ch != '|'){
             f >> ch;
+            // to check delete part
+            if(ch == '*'){
+                isDeleted = true;
+                return -1;
+            }
             // check that the character is between 0 and 9
             if (ch >= 48 && ch <= 57){
                 lengthIndicator += ch;
@@ -251,8 +276,19 @@ public:
         Author * author = new Author("NO ID", "No Name", "No Address");
         try{
             // read (length indicator) first
-            int recordLength = AuthorDataFile::readLengthIndicator(f, offset);
-
+            bool isDeleted;
+            int recordLength = AuthorDataFile::readLengthIndicator(f, offset, isDeleted);
+            if (isDeleted){
+                bool notAvailPointer;
+                int availPointer = readAvailNodePointer(f, notAvailPointer);
+                int lengthAfterDelete;
+                if (notAvailPointer){
+                    lengthAfterDelete = readLengthIndicator(f, offset + 2, isDeleted);
+                }else{
+                    lengthAfterDelete = readLengthIndicator(f, offset + 2 + to_string(availPointer).length(), isDeleted);
+                }
+                return readAuthor(f, offset + lengthAfterDelete);
+            }
             // read the hole record
             string record = AuthorDataFile::readAuthorRecord(f, recordLength, offset + to_string(recordLength).length());
 
@@ -261,6 +297,7 @@ public:
             return author;
         }
         catch(...){
+            cout << "catch error from read author function in data file" << endl;
             return nullptr;
         }
     }
@@ -271,6 +308,7 @@ public:
 
     // this part can be an author or part from author
     // *-1|<deleted part size> ---- anything after it
+    // or be *|<deleted part size>
     static bool deletePart(fstream &file, int offset, int partLength){
         if(file.is_open()){
             // check if can
