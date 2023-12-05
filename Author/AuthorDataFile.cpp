@@ -328,11 +328,10 @@ public:
             file.put('*');
 
             if(cond){
-                cout << "mariooo" << endl;
-                file << "-1" << "|" << stringPartLength << "|";
+                file << "-1" << "|" << to_string(stoi(stringPartLength) + 2) << "|";
             }
             else{
-                file << "|" << stringPartLength << "|";
+                file << "|" << to_string(stoi(stringPartLength) + 2) << "|";
             }
         }else{
             cerr << "Error While Deleting From Delete Part Function in Author Data File" << endl;
@@ -340,7 +339,7 @@ public:
     }
 
     // can be added with negative or positive value
-    static void updateNumOfRecordsInHeader(fstream file, int addNumRecords){
+    static void updateNumOfRecordsInHeader(fstream &file, int addNumRecords){
         if(addNumRecords){
             AuthorHeader::updateHeaderRecord(file, addNumRecords);
         }

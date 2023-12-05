@@ -66,7 +66,7 @@ public:
                 authorPrimaryIndex->deleteAuthor(ID);
 
                 // delete the author from all index files -->
-
+                AuthorDataFile::updateNumOfRecordsInHeader(dataFile, -1);
                 return true;
             }
             else{
