@@ -155,7 +155,7 @@ private:
         // return the suitable size that fit the new one
         for (int i = 0; i < availListVector.size(); ++i) {
             if (availListVector[i].begin()->first >= recordLength){
-                return availListVector[i].begin()->first;
+                return availListVector[i].begin()->second;
             }
         }
         return -1;
@@ -290,10 +290,10 @@ public:
             file.put('*');
 
             if(cond){
-                file << "-1" << "|" << stringPartLength << "|";
+                file << "-1" << "|" << to_string(stoi(stringPartLength) + 2) << "|";
             }
             else{
-                file << "|" << stringPartLength << "|";
+                file << "|" << to_string(stoi(stringPartLength) + 2) << "|";
             }
         }else{
             cerr << "Error While Deleting From Delete Part Function in Author Data File" << endl;
