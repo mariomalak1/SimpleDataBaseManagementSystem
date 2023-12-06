@@ -148,6 +148,57 @@ private:
         }
     }
 
+    static int readNextPointer(fstream &f, int specificNodeOffset){
+        f.seekg(specificNodeOffset + 1, ios::beg);
+        string next;
+        char c;
+        while (!f.eof()){
+            c = f.get();
+            if (c == '-' || (c >= 48 && c <= 57)){
+                next += c;
+            }else{
+                break;
+            }
+        }
+        return stoi(next);
+    }
+
+    static int readPreviousPointer(fstream &f, int specificNodeOffset, int &isFirstNodeInList){
+        int firstNode = AuthorHeader::getFirstNodeAvailList();
+        if (firstNode == -1){
+            isFirstNodeInList = 1;
+            return -1;
+        }
+        int next = readNextPointer(f, firstNode);
+        int pre = next;
+        while (next != -1 and next != specificNodeOffset){
+            pre = next;
+            next = readNextPointer(f, next);
+        }
+        return pre;
+    }
+
+    // if avail list have at least one node
+    static void removeFromAvailList(fstream &f, int specificNodeOffset){
+        int isFirstNodeInList = 0;
+        int previousPointer = readPreviousPointer(f, specificNodeOffset, isFirstNodeInList);
+
+        if (isFirstNodeInList){
+            return;
+        }
+
+        int nextPointer = readNextPointer(f, specificNodeOffset);
+
+        if (previousPointer == AuthorHeader::getFirstNodeAvailList()){
+            // change avail list pointer to the next pointer
+            AuthorHeader::setFirstNodeInAvailList(f, nextPointer);
+        }
+        else{
+            AuthorHeader::changePointer(f, previousPointer, nextPointer, specificNodeOffset);
+        }
+    }
+
+
     // will return the offset of the suitable record
     static int availList(int recordLength, fstream&f){
         vector<map<int, int>> availListVector = AuthorHeader::AvailList(f);
@@ -155,7 +206,7 @@ private:
         // return the suitable size that fit the new one
         for (int i = 0; i < availListVector.size(); ++i) {
             if (availListVector[i].begin()->first >= recordLength){
-                return availListVector[i].begin()->first;
+                return availListVector[i].begin()->second;
             }
         }
         return -1;
@@ -268,6 +319,44 @@ public:
     static bool addAuthor(Author &author, int &authorOffset);
 
     static Author * linear_search_ID(string id, int & AuthorOffset);
+
+    // this part can be an author or part from author
+    // *-1|<deleted part size> ---- anything after it
+    static bool deletePart(fstream &file, int offset, int partLength){
+        if(file.is_open()){
+            // check if can
+            string stringPartLength = to_string(partLength);
+
+            // check if it is small part will ignore it and will not put in avail list
+            // if length of the remaining part is smaller than length of (length of record as string) + (length of | *) and length of -1 as string
+            if (partLength < (stringPartLength.length() + 4)){
+                return false;
+            }
+
+            // check if can delete this part, or it is small one
+            bool cond = AuthorHeader::changePointerLastNodeAvailList(file, offset);
+
+            file.seekp(offset);
+            // put delete mark
+            file.put('*');
+
+            if(cond){
+                file << "-1" << "|" << to_string(stoi(stringPartLength) + 2) << "|";
+            }
+            else{
+                file << "|" << to_string(stoi(stringPartLength) + 2) << "|";
+            }
+        }else{
+            cerr << "Error While Deleting From Delete Part Function in Author Data File" << endl;
+        }
+    }
+
+    // can be added with negative or positive value
+    static void updateNumOfRecordsInHeader(fstream &file, int addNumRecords){
+        if(addNumRecords){
+            AuthorHeader::updateHeaderRecord(file, addNumRecords);
+        }
+    }
 };
 
 const string AuthorDataFile::FileName = "Data\\Author.txt";
@@ -282,18 +371,14 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
 
     AuthorHeader::readHeaderRecord(file);
 
-    // check that no id entered before as this id from index or linear search
-    if(linear_search_ID(author.getID(), authorOffset) != nullptr){
-        cerr << "You can't add id that entered before" << endl;
-        return false;
-    }
-
     int recordLength = author.getLengthOfRecord();
     int suitableOffsetIfFound = availList(recordLength, file);
 
     if (suitableOffsetIfFound != -1){
         file.seekp(suitableOffsetIfFound, ios::beg);
         // mark the remaining part as deleted
+        // change the pointer that point to this node to the next node
+        removeFromAvailList(file, suitableOffsetIfFound);
     }
     else {
         file.seekg(0, ios::end);

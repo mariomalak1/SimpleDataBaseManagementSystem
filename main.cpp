@@ -1,9 +1,32 @@
 #include "Application.cpp"
-#include "Author/AuthorPrimaryIndex.cpp"
+
 int main() {
     Application application = Application();
     application.run();
 
+//    // search with id in primary index
+//    AuthorData authorData = AuthorData();
+//    while (true){
+//        getline(cin, id);
+//        if (id == "-1"){
+//            break;
+//        }
+//        Author * author = authorData.searchWithID(id);
+//        if (author != nullptr){
+//            cout << *author << endl;
+//        }
+//    }
+
+    string id;
+    AuthorData authorData = AuthorData();
+    while (true){
+        getline(cin, id);
+        if (id == "-1"){
+            exit(0);
+        }
+
+        cout << authorData.deleteAuthor(id) << endl;
+    }
 
 //    AuthorData authorData = AuthorData();
 ////    Author author = Author("ID", "Name", "Address");
