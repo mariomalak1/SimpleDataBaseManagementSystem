@@ -1,9 +1,0 @@
-#ifndef SIMPLEDATABASEMANAGMENTSYSTEM__INDEX_H
-#define SIMPLEDATABASEMANAGMENTSYSTEM__INDEX_H
-#include <vector>
-class PrimaryIndex{
-public:
-    vector<int>vec;
-};
-
-#endif //SIMPLEDATABASEMANAGMENTSYSTEM__INDEX_H
