@@ -148,6 +148,57 @@ private:
         }
     }
 
+    static int readNextPointer(fstream &f, int specificNodeOffset){
+        f.seekg(specificNodeOffset + 1, ios::beg);
+        string next;
+        char c;
+        while (!f.eof()){
+            c = f.get();
+            if (c == '-' || (c >= 48 && c <= 57)){
+                next += c;
+            }else{
+                break;
+            }
+        }
+        return stoi(next);
+    }
+
+    static int readPreviousPointer(fstream &f, int specificNodeOffset, int &isFirstNodeInList){
+        int firstNode = AuthorHeader::getFirstNodeAvailList();
+        if (firstNode == -1){
+            isFirstNodeInList = 1;
+            return -1;
+        }
+        int next = readNextPointer(f, firstNode);
+        int pre = next;
+        while (next != -1 and next != specificNodeOffset){
+            pre = next;
+            next = readNextPointer(f, next);
+        }
+        return pre;
+    }
+
+    // if avail list have at least one node
+    static void removeFromAvailList(fstream &f, int specificNodeOffset){
+        int isFirstNodeInList = 0;
+        int previousPointer = readPreviousPointer(f, specificNodeOffset, isFirstNodeInList);
+
+        if (isFirstNodeInList){
+            return;
+        }
+
+        int nextPointer = readNextPointer(f, specificNodeOffset);
+
+        if (previousPointer == AuthorHeader::getFirstNodeAvailList()){
+            // change avail list pointer to the next pointer
+            AuthorHeader::setFirstNodeInAvailList(f, nextPointer);
+        }
+        else{
+            AuthorHeader::changePointer(f, previousPointer, nextPointer, specificNodeOffset);
+        }
+    }
+
+
     // will return the offset of the suitable record
     static int availList(int recordLength, fstream&f){
         vector<map<int, int>> availListVector = AuthorHeader::AvailList(f);
@@ -326,6 +377,8 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
     if (suitableOffsetIfFound != -1){
         file.seekp(suitableOffsetIfFound, ios::beg);
         // mark the remaining part as deleted
+        // change the pointer that point to this node to the next node
+        removeFromAvailList(file, suitableOffsetIfFound);
     }
     else {
         file.seekg(0, ios::end);

@@ -204,6 +204,45 @@ public:
 //        }
     }
 
+    static void changePointer(fstream &f, int offsetOfPrevious, int offsetOfNext, int offsetOfCurrent){
+        f.seekp(offsetOfPrevious + 1, ios::beg);
+
+        string stringOffsetOfCurrent = to_string(offsetOfCurrent);
+        string stringOffsetOfNext = to_string(offsetOfNext);
+
+        if (stringOffsetOfCurrent.length() != stringOffsetOfNext.length()){
+            f.seekg(stringOffsetOfCurrent.length() + 1, ios::cur);
+            char c;
+            string len;
+            while (true){
+                c = f.get();
+                if (c >= 48 && c <= 57){
+                    len += c;
+                }else{
+                    break;
+                }
+            }
+            int length = stoi(len);
+            if (stringOffsetOfCurrent.length() > stringOffsetOfNext.length()){
+                length -= (stringOffsetOfCurrent.length() - stringOffsetOfNext.length());
+            }else{
+                length += (stringOffsetOfNext.length() - stringOffsetOfCurrent.length());
+            }
+            string record = "*" + stringOffsetOfNext + "|" + to_string(length);
+            f.seekp(offsetOfPrevious, ios::beg);
+            f << record;
+        }
+        else{
+            f << stringOffsetOfNext;
+        }
+    }
+
+    static void setFirstNodeInAvailList(fstream &f, int offset){
+        string string1 = formatString(offset, AVAIL_LIST_SIZE);
+        copyStringToArray(string1, availList, AVAIL_LIST_SIZE);
+        updateHeaderRecord(f);
+    }
+
     static int getFirstNodeAvailList(){
         if (isCharArrayEmpty(availList)){
             string string1 = formatString(-1, AVAIL_LIST_SIZE);
