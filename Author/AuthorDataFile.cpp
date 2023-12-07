@@ -27,6 +27,12 @@ private:
     char Name [SIZE];
     char Address [SIZE];
 public:
+    Author(){
+        strcpy(ID, "NO ID");
+        strcpy(Name, "No Name");
+        strcpy(Address, "No Address");
+    }
+
     Author(const char *id, const char *name, const char *address){
         strcpy(ID, id);
         strcpy(Name, name);
@@ -49,6 +55,14 @@ public:
         for (int i = 0; i < length; ++i) {
             this->Name[i] = au.Name[i];
         }
+    }
+
+    // check that author object has real data -> not -> No ID, No Name ...
+    bool isEmptyAuthor(){
+        if ( strcmp(ID,"NO ID") and strcmp(Name,"NO Name") and strcmp(Address,"NO Address") ){
+            return true;
+        }
+        return false;
     }
 
     // get all data from user
@@ -129,7 +143,8 @@ public:
 
     // return length of the record with delimiters
     int getLengthOfRecord(){
-        return ((this->getID().length()) + (this->getName().length()) + (this->getAddress().length())) + 3;
+        int len = ((this->getID().length()) + (this->getName().length()) + (this->getAddress().length())) + 3;
+        return len;
     }
 };
 
@@ -198,7 +213,6 @@ private:
         }
     }
 
-
     // will return the offset of the suitable record
     static int availList(int recordLength, fstream&f){
         vector<map<int, int>> availListVector = AuthorHeader::AvailList(f);
@@ -250,12 +264,20 @@ private:
         author.setAddress(const_cast<char *>(address.c_str()));
     }
 
-    static int readLengthIndicator(fstream &f, int index) {
-
+    static int readLengthIndicator(fstream &f, int index, bool &isDeleted) {
         f.seekg(index, ios::beg);
-
         string lengthIndicator = "";
         char ch;
+        f >> ch;
+        // to check delete part
+        if(ch == '*'){
+            isDeleted = true;
+            return -1;
+        }else{
+            if (ch >= 48 && ch <= 57){
+                lengthIndicator += ch;
+            }
+        }
         while (!f.eof() && ch != '|'){
             f >> ch;
             // check that the character is between 0 and 9
@@ -282,6 +304,40 @@ private:
         f.read(record, recordLength);
         return record;
     }
+
+    // assume you after * char
+    static int readAvailNodePointer(fstream &f, bool &notAvailPointer){
+        char c;
+        string availNodePointer;
+
+        c = f.get();
+        if(c == '|'){
+            notAvailPointer = true;
+            return -1;
+        }else{
+            availNodePointer += c;
+        }
+
+        while (  (!f.eof()) ){
+            c = f.get();
+            if (c == '-' or (c >= 48 && c <= 57)){
+                availNodePointer += c;
+            }else{
+                break;
+            }
+        }
+        notAvailPointer = false;
+        return stoi(availNodePointer);
+    }
+
+    static bool checkEOF(fstream &f, int offset){
+        f.seekg(0, ios::end);
+        int eof = f.tellg();
+        if (offset >= eof){
+            return true;
+        }
+        return false;
+    }
 public:
     static void checkFileIsFirstOpen(fstream &file){
         file.seekg(0, ios::beg);
@@ -298,22 +354,40 @@ public:
         return AuthorDataFile::FileName;
     }
 
-    static Author * readAuthor(fstream &f, int offset = 0){
-        Author * author = new Author("NO ID", "No Name", "No Address");
-        try{
+    static Author * readAuthor(fstream &f, int offset, int & lengthDeletedRecords){
+        // check if we in eof
+        if (checkEOF(f, offset)){
+            return nullptr;
+        }
+        Author * author = new Author();
+//        try{
             // read (length indicator) first
-            int recordLength = AuthorDataFile::readLengthIndicator(f, offset);
-
+            bool isDeleted;
+            int recordLength = AuthorDataFile::readLengthIndicator(f, offset, isDeleted);
+            cout << "offset : " << offset << " is deleted : " << isDeleted << "  record length : " << recordLength << endl;
+            if (isDeleted){
+                bool notAvailPointer;
+                int availPointer = readAvailNodePointer(f, notAvailPointer);
+                int lengthAfterDelete;
+                if (notAvailPointer){
+                    lengthAfterDelete = readLengthIndicator(f, offset + 2, isDeleted);
+                }else{
+                    lengthAfterDelete = readLengthIndicator(f, offset + 2 + to_string(availPointer).length(), isDeleted);
+                }
+                lengthDeletedRecords += lengthAfterDelete;
+                return readAuthor(f, offset + lengthAfterDelete, lengthDeletedRecords);
+            }
             // read the hole record
             string record = AuthorDataFile::readAuthorRecord(f, recordLength, offset + to_string(recordLength).length());
-
+            cout << "record : " << record << endl;
             // split the record and put in author object
             AuthorDataFile::splitRecordIntoAuthor(*author, record);
             return author;
-        }
-        catch(...){
-            return nullptr;
-        }
+//        }
+//        catch(...){
+//            cout << "catch error from read author function in data file" << endl;
+//            return nullptr;
+//        }
     }
 
     static bool addAuthor(Author &author, int &authorOffset);
@@ -401,7 +475,8 @@ Author * AuthorDataFile::linear_search_ID(string id, int & AuthorOffset) {
 
     while (true){
         try{
-            Author * author = readAuthor(f, offset);
+            int lengthDeletedRecords = 0;
+            Author * author = readAuthor(f, offset, lengthDeletedRecords);
             if(author == nullptr){
                 return nullptr;
             }

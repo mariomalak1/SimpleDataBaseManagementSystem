@@ -28,11 +28,11 @@ private:
 
         int offset = AuthorHeader::HeaderLength(dataFile);
         map<string, int> map;
-        cout << "offset of header after update : " << offset << endl;
 
         while (true){
-            Author * author = AuthorDataFile::readAuthor(dataFile, offset);
-
+            int lengthDeletedRecords = 0;
+            Author * author = AuthorDataFile::readAuthor(dataFile, offset, lengthDeletedRecords);
+            cout << "lengthDeletedRecords : " << lengthDeletedRecords << "  offset : " << offset << endl;
             if (author == nullptr){
                 dataFile.close();
                 return;
@@ -43,7 +43,7 @@ private:
             map.erase(author->getID());
 
             int recordLength = author->getLengthOfRecord();
-            offset += recordLength + to_string(recordLength).length();
+            offset += recordLength + to_string(recordLength).length() + lengthDeletedRecords;
         }
     }
 
@@ -52,8 +52,6 @@ private:
         dataFile.open(AuthorDataFile::getFileName(), ios::in);
         // put all data in data file
         readFileDataPutInMemory(dataFile);
-
-        cout << "After Read" << endl;
 
         // sort index
         sortIndex();
@@ -215,7 +213,8 @@ public:
             f.open(AuthorDataFile::getFileName(), ios::in);
 
             offset = vec[index].begin()->second;
-            author = AuthorDataFile::readAuthor(f,offset);
+            int lengthDeletedRecords = 0;
+            author = AuthorDataFile::readAuthor(f,offset, lengthDeletedRecords);
             return author;
         }
         offset = -1;
