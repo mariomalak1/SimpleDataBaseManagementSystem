@@ -27,6 +27,12 @@ private:
     char Name [SIZE];
     char Address [SIZE];
 public:
+    Author(){
+        strcpy(ID, "NO ID");
+        strcpy(Name, "No Name");
+        strcpy(Address, "No Address");
+    }
+
     Author(const char *id, const char *name, const char *address){
         strcpy(ID, id);
         strcpy(Name, name);
@@ -49,6 +55,14 @@ public:
         for (int i = 0; i < length; ++i) {
             this->Name[i] = au.Name[i];
         }
+    }
+
+    // check that author object has real data -> not -> No ID, No Name ...
+    bool isEmptyAuthor(){
+        if ( strcmp(ID,"NO ID") and strcmp(Name,"NO Name") and strcmp(Address,"NO Address") ){
+            return true;
+        }
+        return false;
     }
 
     // get all data from user
@@ -129,7 +143,8 @@ public:
 
     // return length of the record with delimiters
     int getLengthOfRecord(){
-        return ((this->getID().length()) + (this->getName().length()) + (this->getAddress().length())) + 3;
+        int len = ((this->getID().length()) + (this->getName().length()) + (this->getAddress().length())) + 3;
+        return len;
     }
 };
 
@@ -251,7 +266,6 @@ private:
 
     static int readLengthIndicator(fstream &f, int index, bool &isDeleted) {
         f.seekg(index, ios::beg);
-
         string lengthIndicator = "";
         char ch;
         f >> ch;
@@ -259,6 +273,10 @@ private:
         if(ch == '*'){
             isDeleted = true;
             return -1;
+        }else{
+            if (ch >= 48 && ch <= 57){
+                lengthIndicator += ch;
+            }
         }
         while (!f.eof() && ch != '|'){
             f >> ch;
@@ -296,6 +314,8 @@ private:
         if(c == '|'){
             notAvailPointer = true;
             return -1;
+        }else{
+            availNodePointer += c;
         }
 
         while (  (!f.eof()) ){
@@ -310,7 +330,14 @@ private:
         return stoi(availNodePointer);
     }
 
-
+    static bool checkEOF(fstream &f, int offset){
+        f.seekg(0, ios::end);
+        int eof = f.tellg();
+        if (offset >= eof){
+            return true;
+        }
+        return false;
+    }
 public:
     static void checkFileIsFirstOpen(fstream &file){
         file.seekg(0, ios::beg);
@@ -328,8 +355,13 @@ public:
     }
 
     static Author * readAuthor(fstream &f, int offset = 0){
-        Author * author = new Author("NO ID", "No Name", "No Address");
-        try{
+        // check if we in eof
+        if (checkEOF(f, offset)){
+            return nullptr;
+        }
+
+        Author * author = new Author();
+//        try{
             // read (length indicator) first
             bool isDeleted;
             int recordLength = AuthorDataFile::readLengthIndicator(f, offset, isDeleted);
@@ -350,11 +382,11 @@ public:
             // split the record and put in author object
             AuthorDataFile::splitRecordIntoAuthor(*author, record);
             return author;
-        }
-        catch(...){
-            cout << "catch error from read author function in data file" << endl;
-            return nullptr;
-        }
+//        }
+//        catch(...){
+//            cout << "catch error from read author function in data file" << endl;
+//            return nullptr;
+//        }
     }
 
     static bool addAuthor(Author &author, int &authorOffset);

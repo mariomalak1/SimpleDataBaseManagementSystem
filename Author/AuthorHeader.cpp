@@ -162,33 +162,24 @@ public:
             f.seekg(1, ios::cur);
 
             // to parse the next pointer record offset
-            cout << "nextNodePointer :  ";
             while (true) {
                 f.get(c);
-                cout << c;
                 if (c >= 48 and c <= 57 || (c == '-')) {
                     nextNodePointer += c;
                 } else {
                     break;
                 }
             }
-            cout << endl;
 
-            cout << "size of record : ";
             // to parse the size of record
             while (true) {
                 f.get(c);
-                cout << c;
                 if (c >= 48 and c <= 57) {
                     sizeOfRecordInAvailList += c;
                 } else {
                     break;
                 }
             }
-            cout << endl;
-
-            cout << "sizeOfRecordInAvailList : " << sizeOfRecordInAvailList << endl;
-            cout << "nextNodePointer : " << sizeOfRecordInAvailList << endl;
 
             int recordLength = stoi(sizeOfRecordInAvailList);
 
@@ -256,8 +247,9 @@ public:
     static int HeaderLength(fstream &f){
         // update header data
         AuthorHeader::readHeaderRecord(f);
-        // length of header + delimiter + '\n'
-        return strlen(availList) + strlen(numRecords) + strlen(lastUpdated) + 4;
+        // length of header + delimiters + '\n'
+        int len = strlen(availList) + strlen(numRecords) + strlen(lastUpdated) + 5;
+        return len;
     }
 
     static void readHeaderRecord(fstream &file){

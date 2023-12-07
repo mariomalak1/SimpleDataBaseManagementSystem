@@ -56,6 +56,7 @@ public:
         // delete all books with this author id -> with all indexes for books
 
 
+
         // delete from the data file
         fstream dataFile;
         dataFile.open(AuthorDataFile::getFileName(), ios::in|ios::out);

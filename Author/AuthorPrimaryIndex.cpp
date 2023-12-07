@@ -28,7 +28,6 @@ private:
 
         int offset = AuthorHeader::HeaderLength(dataFile);
         map<string, int> map;
-        cout << "offset of header after update : " << offset << endl;
 
         while (true){
             Author * author = AuthorDataFile::readAuthor(dataFile, offset);
@@ -52,8 +51,6 @@ private:
         dataFile.open(AuthorDataFile::getFileName(), ios::in);
         // put all data in data file
         readFileDataPutInMemory(dataFile);
-
-        cout << "After Read" << endl;
 
         // sort index
         sortIndex();
