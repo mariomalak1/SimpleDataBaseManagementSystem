@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Author/AuthorData.cpp"
+#include "queryProcessing.cpp"
 using namespace std;
 
 class Application{
@@ -79,7 +80,7 @@ private:
             // print book with id
         }
         else if (response == "9"){
-            // write query
+            queryProcessing::query();
         }
         else if (response == "0") {
             cout << "Turn Off" << endl;

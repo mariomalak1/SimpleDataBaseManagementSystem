@@ -4,15 +4,17 @@
 #include <vector>
 #include <algorithm>
 #include "Author/AuthorData.cpp"
+#include "Book/BookData.cpp"
 
 using namespace std;
 class queryProcessing{
 private:
-    static AuthorData ad ;
+    static AuthorData ad;
     static int offset;
     static string  takeQuery(){
-        cout <<"Enter the query: \n";
+        cout <<"Enter the query: ";
         string query ;
+        cin.ignore();
         getline (cin , query);
         return query;
 
@@ -138,12 +140,5 @@ public:
         processQuery();
     }
 };
-
-
-
-
-int main() {
-    queryProcessing::query();
-    return 0;
-}
-
+AuthorData queryProcessing::ad = AuthorData();
+int queryProcessing::offset = 0;

@@ -186,7 +186,9 @@ CMakeFiles/SimpleDataBaseManagementSystem_.dir/main.cpp.obj: ../main.cpp \
   D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/stl_heap.h \
   D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/stl_tempbuf.h \
   D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/uniform_int_dist.h \
-  ../Author/AuthorPrimaryIndex.cpp
+  ../Author/AuthorPrimaryIndex.cpp \
+  ../queryProcessing.cpp \
+  ../Book/BookData.cpp
 
 
 ../main.cpp:
@@ -352,6 +354,8 @@ D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/cctype
 D:/CLion-2021.3.3/bin/mingw/x86_64-w64-mingw32/include/ctype.h:
 
 D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/ios_base.h:
+
+../queryProcessing.cpp:
 
 D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/ext/atomicity.h:
 
@@ -560,3 +564,5 @@ D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/s
 D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/uniform_int_dist.h:
 
 ../Author/AuthorPrimaryIndex.cpp:
+
+../Book/BookData.cpp:
