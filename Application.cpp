@@ -5,6 +5,7 @@ using namespace std;
 class Application{
 private:
     AuthorData * authorData;
+    BookData * bookData;
 
     void printMenu(){
         cout << "1- Add New Author" << endl;
