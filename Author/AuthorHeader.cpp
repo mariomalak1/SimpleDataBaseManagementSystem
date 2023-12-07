@@ -318,7 +318,7 @@ public:
 
                 string recordAfterModification = "*" + stringLastNodeOffset + "|" + beforeLastNodeLength + "|";
 
-                if (beforeLastNodeLength.length() <= recordAfterModification.length()){
+                if (stoi(beforeLastNodeLength) <= recordAfterModification.length()){
                     return false;
                 }
 
