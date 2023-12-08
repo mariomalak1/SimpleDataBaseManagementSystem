@@ -61,7 +61,7 @@ public:
         fstream dataFile;
         dataFile.open(AuthorDataFile::getFileName(), ios::in|ios::out);
 
-        bool deleted = AuthorDataFile::deletePart(dataFile, offset, author->getLengthOfRecord());
+        bool deleted = AuthorDataFile::deleteAuthorFromFile(dataFile, offset, author->getLengthOfRecord());
 
         if (deleted){
             authorPrimaryIndex->deleteAuthor(ID);

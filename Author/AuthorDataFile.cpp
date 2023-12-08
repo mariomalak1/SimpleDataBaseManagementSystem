@@ -22,6 +22,7 @@ class Author{
 public:
     static const int SIZE = 30;
     static const int SIZE_ID = 15;
+    static const int NORMAL_LENGTH = 15;
 private:
     char ID [SIZE_ID];
     char Name [SIZE];
@@ -193,7 +194,7 @@ private:
         return pre;
     }
 
-    // if avail list have at least one node
+    // work if avail list have at least one node
     static void removeFromAvailList(fstream &f, int specificNodeOffset){
         int isFirstNodeInList = 0;
         int previousPointer = readPreviousPointer(f, specificNodeOffset, isFirstNodeInList);
@@ -338,6 +339,44 @@ private:
         }
         return false;
     }
+
+    // it must be node in avail list -> have next pointer and have length
+    static int readLengthOfNodeInAvailList(fstream &file, int offset){
+        int availPointer = readNextPointer(file, offset);
+        file.seekg(offset + 2 + to_string(availPointer).length());
+        char ch;
+        string length;
+        while (true){
+            ch = file.get();
+            if ((ch >= 48 and ch <= 57)){
+                length += ch;
+            }else{
+                break;
+            }
+        }
+        return stoi(length);
+    }
+
+    // to delete the remaining part after addition
+    static bool deletePart(fstream &file, int offset, int newAddedLength, int oldLength){
+        if(file.is_open()){
+            // part len = old len - new len - (length indicator of new record)
+            int partLength = oldLength - newAddedLength - 2;
+
+            if (partLength >= Author::NORMAL_LENGTH){
+                return deleteAuthorFromFile(file, offset, partLength);
+            }
+            else{
+                file.seekp(offset + newAddedLength + 2 , ios::beg);
+                file << "*|" << to_string(partLength) << "|";
+                return true;
+            }
+        }
+        else{
+            return false;
+        }
+    }
+
 public:
     static void checkFileIsFirstOpen(fstream &file){
         file.seekg(0, ios::beg);
@@ -364,7 +403,6 @@ public:
             // read (length indicator) first
             bool isDeleted;
             int recordLength = AuthorDataFile::readLengthIndicator(f, offset, isDeleted);
-            cout << "offset : " << offset << " is deleted : " << isDeleted << "  record length : " << recordLength << endl;
             if (isDeleted){
                 bool notAvailPointer;
                 int availPointer = readAvailNodePointer(f, notAvailPointer);
@@ -379,7 +417,6 @@ public:
             }
             // read the hole record
             string record = AuthorDataFile::readAuthorRecord(f, recordLength, offset + to_string(recordLength).length());
-            cout << "record : " << record << endl;
             // split the record and put in author object
             AuthorDataFile::splitRecordIntoAuthor(*author, record);
             return author;
@@ -394,9 +431,8 @@ public:
 
     static Author * linear_search_ID(string id, int & AuthorOffset);
 
-    // this part can be an author or part from author
-    // *-1|<deleted part size> ---- anything after it
-    static bool deletePart(fstream &file, int offset, int partLength){
+    // to delete the author and put it in avail list if it's size is big enough
+    static bool deleteAuthorFromFile(fstream &file, int offset, int partLength){
         if(file.is_open()){
             // check if can
             string stringPartLength = to_string(partLength);
@@ -420,8 +456,10 @@ public:
             else{
                 file << "|" << to_string(stoi(stringPartLength) + 2) << "|";
             }
+            return true;
         }else{
-            cerr << "Error While Deleting From Delete Part Function in Author Data File" << endl;
+            cerr << "Error While Deleting From Delete Author." << endl;
+            return false;
         }
     }
 
@@ -447,15 +485,17 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
 
     int recordLength = author.getLengthOfRecord();
     int suitableOffsetIfFound = availList(recordLength, file);
-
     if (suitableOffsetIfFound != -1){
-        file.seekp(suitableOffsetIfFound, ios::beg);
+        int oldLength = readLengthOfNodeInAvailList(file, suitableOffsetIfFound);
         // mark the remaining part as deleted
+        deletePart(file, suitableOffsetIfFound, author.getLengthOfRecord(), oldLength);
+
         // change the pointer that point to this node to the next node
-        removeFromAvailList(file, suitableOffsetIfFound);
+//        removeFromAvailList(file, suitableOffsetIfFound);
+    file.seekp(suitableOffsetIfFound, ios::beg);
     }
     else {
-        file.seekg(0, ios::end);
+        file.seekp(0, ios::end);
     }
 
     authorOffset = file.tellp();

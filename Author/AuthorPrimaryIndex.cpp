@@ -32,7 +32,6 @@ private:
         while (true){
             int lengthDeletedRecords = 0;
             Author * author = AuthorDataFile::readAuthor(dataFile, offset, lengthDeletedRecords);
-            cout << "lengthDeletedRecords : " << lengthDeletedRecords << "  offset : " << offset << endl;
             if (author == nullptr){
                 dataFile.close();
                 return;
