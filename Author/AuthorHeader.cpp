@@ -198,6 +198,8 @@ public:
         string stringOffsetOfCurrent = to_string(offsetOfCurrent);
         string stringOffsetOfNext = to_string(offsetOfNext);
 
+        cout << "stringOffsetOfCurrent : " << stringOffsetOfCurrent << "stringOffsetOfNext : " << stringOffsetOfNext << endl;
+
         if (stringOffsetOfCurrent.length() != stringOffsetOfNext.length()){
             f.seekg(stringOffsetOfCurrent.length() + 1, ios::cur);
             char c;
@@ -282,6 +284,7 @@ public:
 
     static bool changePointerLastNodeAvailList(fstream &file, int lastNodeOffset){
         string stringLastNodeOffset = to_string(lastNodeOffset);
+        cout << "lastNodeOffset : " << lastNodeOffset << endl;
 
         vector<map<int, int>> vec = AvailList(file);
 
@@ -291,8 +294,8 @@ public:
         }
         else{
             map<int, int> map = vec[vec.size() - 1];
-            file.seekp(map.begin()->second + 1, ios::beg);
-
+            int offsetOfLastNodeInAvailList = map.begin()->second;
+            file.seekp(offsetOfLastNodeInAvailList + 1, ios::beg);
 
             // check that the length of offset is equal -1
             if (stringLastNodeOffset.length() == 2){
@@ -320,7 +323,8 @@ public:
                 }
 
                 // return to the first char in record -> *
-                file.seekp(-(3 + beforeLastNodeLength.length()));
+                file.seekp(offsetOfLastNodeInAvailList, ios::beg);
+                cout << "file.tell() after seek with negative in change last node : " << file.tellp() << endl;
                 file << recordAfterModification;
             }
         }

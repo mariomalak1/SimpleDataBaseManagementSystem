@@ -257,15 +257,12 @@ public:
         if (mapToRemove != vec.end()) {
             // Erase the map from the vector
             vec.erase(mapToRemove);
-            fstream f;
-            f.open(getFileName(), ios::out);
             setFlagOff();
             writeIndexFile();
             return true;
         } else {
             return false;
         }
-        return false;
     }
 
     // must put indexState with a value
