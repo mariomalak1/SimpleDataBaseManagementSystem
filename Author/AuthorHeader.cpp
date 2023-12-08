@@ -284,7 +284,6 @@ public:
 
     static bool changePointerLastNodeAvailList(fstream &file, int lastNodeOffset){
         string stringLastNodeOffset = to_string(lastNodeOffset);
-        cout << "lastNodeOffset : " << lastNodeOffset << endl;
 
         vector<map<int, int>> vec = AvailList(file);
 
@@ -324,7 +323,6 @@ public:
 
                 // return to the first char in record -> *
                 file.seekp(offsetOfLastNodeInAvailList, ios::beg);
-                cout << "file.tell() after seek with negative in change last node : " << file.tellp() << endl;
                 file << recordAfterModification;
             }
         }

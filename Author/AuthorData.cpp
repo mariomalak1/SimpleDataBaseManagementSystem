@@ -3,6 +3,7 @@
 
 #include "AuthorDataFile.cpp"
 #include "AuthorPrimaryIndex.cpp"
+#include "AuthorSecondaryIndexName.cpp"
 
 class AuthorData{
 private:
