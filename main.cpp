@@ -1,4 +1,7 @@
 #include "Application.cpp"
+#include "Author/AuthorData.cpp"
+#include "Book/BookData.cpp"
+#include "Book/BookDataFile.cpp"
 
 int main() {
     Application application = Application();
@@ -16,7 +19,6 @@ int main() {
 //            cout << *author << endl;
 //        }
 //    }
-
     string id;
     AuthorData authorData = AuthorData();
     while (true){
@@ -29,7 +31,7 @@ int main() {
     }
 
 //    AuthorData authorData = AuthorData();
-////    Author author = Author("ID", "Name", "Address");
+
 ////    Author author2 = Author("ID2", "Name2", "Address2");
 ////    Author author3 = Author("ID3", "Name3", "Address3");
 ////    Author author4 = Author("ID4", "Name4", "Address4");
@@ -38,6 +40,7 @@ int main() {
 ////    authorData.AddAuthor(author3);
 ////    authorData.AddAuthor(author4);
 //
+
 //    Author author10 = authorData.readAuthor();
 //    cout << author10 << endl;
 //

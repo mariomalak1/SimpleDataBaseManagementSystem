@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "SimpleDataBaseManagementSystem_::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-SimpleDataBaseManagementSystem_-Debug-b6d26535b8c3cc305f76.json",
+					"jsonFile" : "target-SimpleDataBaseManagementSystem_-Debug-8ee7ad91b991b6f6890e.json",
 					"name" : "SimpleDataBaseManagementSystem_",
 					"projectIndex" : 0
 				}
@@ -49,12 +49,12 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "D:/FCAI-CU/Third Year/First Semester/File Managment/Assignments/Assignment 1/SimpleDataBaseManagementSystem/cmake-build-debug",
-		"source" : "D:/FCAI-CU/Third Year/First Semester/File Managment/Assignments/Assignment 1/SimpleDataBaseManagementSystem"
+		"build" : "C:/Users/b.k/Documents/GitHub/SimpleDataBaseManagementSystem/cmake-build-debug",
+		"source" : "C:/Users/b.k/Documents/GitHub/SimpleDataBaseManagementSystem"
 	},
 	"version" : 
 	{
 		"major" : 2,
-		"minor" : 3
+		"minor" : 5
 	}
 }
