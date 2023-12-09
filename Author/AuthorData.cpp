@@ -4,6 +4,7 @@
 #include "AuthorDataFile.cpp"
 #include "AuthorPrimaryIndex.cpp"
 #include "AuthorSecondaryIndexName.cpp"
+#include "../Book/BookData.cpp"
 
 class AuthorData{
 private:
@@ -57,8 +58,8 @@ public:
         }
 
         // delete all books with this author id -> with all indexes for books
-
-
+        BookData bookData = BookData();
+        bookData.AllBooksWrittenByAuthor(author->getID());
 
         // delete from the data file
         fstream dataFile;
@@ -77,14 +78,6 @@ public:
         else {
             return false;
         }
-
-        // delete all books with this author id -> with all indexes for books
-
-        // delete the author from file
-
-        // delete the author from all index files
-
-        return true;
     }
 
     vector<Author> searchWithName(string name){

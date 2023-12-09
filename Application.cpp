@@ -6,6 +6,7 @@ using namespace std;
 class Application{
 private:
     AuthorData * authorData;
+    BookData * bookData;
 
     void printMenu(){
         cout << "1- Add New Author" << endl;
@@ -41,7 +42,11 @@ private:
             }
         }
         else if (response == "2"){
-            // add new book
+            if (bookData->addBook()){
+                cout << "Record added successfully" << endl;
+            }else{
+                cout << "Can't add the record" << endl;
+            }
         }
         else if (response == "3"){
             // update author name with id
@@ -51,6 +56,15 @@ private:
         }
         else if (response == "5"){
             // delete book with id
+            cin.ignore();
+            string ID;
+            cout << "Enter Book ISBN : ";
+            getline(cin, ID);
+            if (bookData->deleteBook(ID)){
+                cout << "Delete Book Done" << endl;
+            }else{
+                cout << "Can't Delete Book" << endl;
+            }
         }
         else if (response == "6"){
             // delete author with id
@@ -78,7 +92,17 @@ private:
             }
         }
         else if (response == "8"){
-            // print book with id
+            string id;
+            cout << "Enter Book ISBN : ";
+            cin >> id;
+            int offset;
+            Book *book = bookData->searchWithISBN(id, offset);
+            if (book != nullptr){
+                cout << *book << endl;
+            }else{
+                cout << "No Book With ISBN : " << id << endl;
+            }
+
         }
         else if (response == "9"){
             queryProcessing::query();
@@ -86,21 +110,6 @@ private:
         else if (response == "0") {
             cout << "Turn Off" << endl;
             exit(0);
-        }
-
-        else if (response == "f") {
-            string name;
-            cin.ignore();
-            getline(cin, name);
-            vector<Author> vector = authorData->searchWithName(name);
-            if (vector.size()){
-                for (int i = 0; i < vector.size(); ++i) {
-                    cout << vector[i] << endl;
-                }
-            }
-            else{
-                cout << "No Name equal : " << name << endl;
-            }
         }
         else{
             cerr << "please enter valid response" << endl;
@@ -114,5 +123,6 @@ public:
 
     Application(){
         authorData = new AuthorData();
+        bookData = new BookData();
     }
 };

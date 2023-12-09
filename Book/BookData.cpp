@@ -23,7 +23,15 @@ public:
 
         // check that no id entered before as this id from index
         if(searchWithISBN(book.getID(), bookOffset) != nullptr){
-            cerr << "You can't add id that entered before" << endl;
+            cerr << "You can't add id that entered before." << endl;
+            return false;
+        }
+
+        // check that author id in book is added before
+        AuthorPrimaryIndex authorPrimaryIndex = AuthorPrimaryIndex();
+        int authorOffset;
+        if (authorPrimaryIndex.search(book.getAuthorID(), authorOffset) == nullptr){
+            cerr << "You can't add book for author didn't entered before." << endl;
             return false;
         }
 
@@ -52,13 +60,9 @@ public:
         int offset = 0;
         Book * book = searchWithISBN(isbn, offset);
         if (book == nullptr){
-            cerr << "No Author With ID : " << isbn << endl;
+            cerr << "No Book With ID : " << isbn << endl;
             return false;
         }
-
-        // delete all books with this author id -> with all indexes for books
-
-
 
         // delete from the data file
         fstream dataFile;
@@ -78,16 +82,9 @@ public:
             return false;
         }
 
-        // delete all books with this author id -> with all indexes for books
-
-        // delete the author from file
-
-        // delete the author from all index files
-
-        return true;
     }
 
-    vector<Book> searchWithName(string authorID){
+    vector<Book> AllBooksWrittenByAuthor(string authorID){
         return bookSecondaryIndexAuthorIDs->search(authorID);
     }
 };
