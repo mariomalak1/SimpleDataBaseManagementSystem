@@ -179,11 +179,11 @@ private:
         return stoi(next);
     }
 
-    static int readPreviousPointer(fstream &f, int specificNodeOffset, int &isListEmpty){
+    static int readPreviousPointer(fstream &f, int specificNodeOffset, bool &isListEmpty){
         int firstNode = AuthorHeader::getFirstNodeAvailList();
         int pre;
         if (firstNode == -1){
-            isListEmpty = 1;
+            isListEmpty = true;
             return -1;
         }
         pre = firstNode;
@@ -201,7 +201,7 @@ private:
 
     // work if avail list have at least one node
     static void removeFromAvailList(fstream &f, int specificNodeOffset){
-        int isListEmpty = 0;
+        bool isListEmpty = false;
         int previousPointer = readPreviousPointer(f, specificNodeOffset, isListEmpty);
 
         if (isListEmpty){
@@ -464,7 +464,7 @@ public:
             }
             return true;
         }else{
-            cerr << "Error While Deleting From Delete Author." << endl;
+            cerr << "Error While Deleting Author." << endl;
             return false;
         }
     }

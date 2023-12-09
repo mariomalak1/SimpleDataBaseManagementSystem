@@ -13,9 +13,9 @@ public:
     static const int SIZE_ID = 15;
     static const int NORMAL_LENGTH = 15;
 private:
-    char ISBN [15]; //primary key
+    char ISBN [SIZE_ID]; //primary key
     char BookTitle [SIZE];
-    char AuthorID [15]; // secondary key
+    char AuthorID [SIZE_ID]; // secondary key
 public:
     Book(){
         strcpy(ISBN, "NO Book ID");

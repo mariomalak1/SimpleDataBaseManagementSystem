@@ -1,8 +1,9 @@
-//
-// Created by lap top eur on ١٢/١١/٢٠٢٣.
-//
-
 #ifndef SIMPLEDATABASEMANAGMENTSYSTEM__BOOKDATA_H
 #define SIMPLEDATABASEMANAGMENTSYSTEM__BOOKDATA_H
+
+#include "BookDataFile.cpp"
+
+
+
 
 #endif //SIMPLEDATABASEMANAGMENTSYSTEM__BOOKDATA_H
