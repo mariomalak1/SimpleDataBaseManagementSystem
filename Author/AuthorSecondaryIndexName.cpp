@@ -77,6 +77,8 @@ private:
             name += line[i];
             i++;
         }
+        i++;
+
         string stringFirstOffset, stringLastOffset;
         while (true){
             if (line[i] == '|'){
@@ -85,15 +87,18 @@ private:
             stringFirstOffset += line[i];
             i++;
         }
+
         firstOffset = stoi(stringFirstOffset);
 
-        while (true){
+        i++;
+        while (i < line.length()){
             if (line[i] == '|'){
                 break;
             }
             stringLastOffset += line[i];
             i++;
         }
+
         lastOffset = stoi(stringLastOffset);
     }
 
@@ -115,10 +120,13 @@ private:
     // function to put name in map and IDs in vector
     void fillNames(fstream &linkedList, map<string, vector<string>> &map, string name, int firstOffset, int lastOffset){
         linkedList.seekg(firstOffset, ios::beg);
-        streamsize numBytesToRead = firstOffset - lastOffset;
+
+
+        streamsize numBytesToRead = lastOffset - firstOffset;
 
         char* buffer = new char[numBytesToRead];
         linkedList.read(buffer, numBytesToRead);
+
 
         vector<string>IDs;
         parseLineOfIDsFillVector(buffer, numBytesToRead,  IDs);
@@ -143,10 +151,7 @@ private:
         while (!secondary.eof()){
             getline(secondary, line);
             if (line == ""){
-                cout << "from if" << endl;
                 continue;
-            } else{
-                cout << "Line : " << line << endl;
             }
             parseLine(line, name, firstOffset, lastOffset);
             fillNames(linkedList, Names, name, firstOffset, lastOffset);
@@ -294,13 +299,15 @@ public:
             // name of author | offset of first location of id in this name | offset of last location of IDs
             for (int i = 0; i < vec.size(); ++i) {
                 if (i == vec.size() - 1){
-                    linkedList << vec[i] << "|";
+                    linkedList << vec[i];
+                    offset += linkedList.tellp();
+                    linkedList << "|";
+                    offset++;
                 }else{
                     linkedList << vec[i] << "-";
                 }
             }
 
-            offset += linkedList.tellp();
 
             Secondary << pair.first << "|" << firstOffset << "|" << offset << "\n";
         }

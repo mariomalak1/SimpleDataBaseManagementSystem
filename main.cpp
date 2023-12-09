@@ -11,7 +11,7 @@ int main() {
     cout << "After load" << endl;
 
     for (const auto& pair : authorSecondaryIndexName.Names) {
-        cout << "Name: " << pair.first << "IDs : ";
+        cout << "Name: " << pair.first << "  IDs : ";
         vector<string> vec = pair.second;
         for (int i = 0; i < vec.size(); ++i) {
             if (i == vec.size() - 1){
@@ -22,27 +22,27 @@ int main() {
         }
     }
 
-    vector<Author> authors = {
-        Author("2", "Name", "Address"),
-        Author("21", "Name", "Address"),
-        Author("213", "Name", "Address"),
-        Author("2134", "Name", "Address"),
-        Author("21345", "Name1", "Address"),
-        Author("213456", "Name1", "Address"),
-        Author("2134567", "Name2", "Address"),
-        Author("21345678", "Name2", "Address"),
-        Author("213456789", "Name0", "Address"),
-        Author("2134567890", "Name1", "Address"),
-    };
-    int offset = 25;
-
-    for (auto r: authors) {
-        authorPrimaryIndex.addAuthor(r, offset);
-        authorSecondaryIndexName.addAuthor(r);
-        offset += r.getLengthOfRecord();
-    }
-
-    authorSecondaryIndexName.writeIndexFile();
+//    vector<Author> authors = {
+//        Author("2", "Name", "Address"),
+//        Author("21", "Name", "Address"),
+//        Author("213", "Name", "Address"),
+//        Author("2134", "Name", "Address"),
+//        Author("21345", "Name1", "Address"),
+//        Author("213456", "Name1", "Address"),
+//        Author("2134567", "Name2", "Address"),
+//        Author("21345678", "Name2", "Address"),
+//        Author("213456789", "Name0", "Address"),
+//        Author("2134567890", "Name1", "Address"),
+//    };
+//    int offset = 25;
+//
+//    for (auto r: authors) {
+//        authorPrimaryIndex.addAuthor(r, offset);
+//        authorSecondaryIndexName.addAuthor(r);
+//        offset += r.getLengthOfRecord();
+//    }
+//
+//    authorSecondaryIndexName.writeIndexFile();
 
 
     string  arr [] = {"Name", "name", "Name1", "Name2", "Name0"};
