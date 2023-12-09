@@ -28,7 +28,30 @@ private:
     void readFileDataPutInMemory(fstream &dataFile){
         // check if the data file is first once open
         AuthorDataFile::checkFileIsFirstOpen(dataFile);
+        int offset = AuthorHeader::HeaderLength(dataFile);
+        while (true) {
+            int lengthDeletedRecords = 0;
+            Author *author = AuthorDataFile::readAuthor(dataFile, offset, lengthDeletedRecords);
+            if (author == nullptr) {
+                dataFile.close();
+                return;
+            }
 
+            auto it = Names.find(author->getName());
+
+            // check if the name is entered before
+            if (it != Names.end()) {
+                // the name is found
+                it->second.push_back(author->getID());
+            }
+            else{
+                vector<string> IDs;
+                IDs.push_back(author->getID());
+                Names.insert(make_pair(author->getName(), IDs));
+            }
+            int recordLength = author->getLengthOfRecord();
+            offset += recordLength + to_string(recordLength).length() + lengthDeletedRecords;
+        }
     }
 
     void makeNewIndexFile(){
@@ -112,13 +135,19 @@ private:
         }
         secondary.seekg(indexState.length() + 1, ios::beg);
         string line;
-
         // int to hold first and last offset of location of IDs
         int firstOffset, lastOffset;
         // string to hold name of author
         string name;
+
         while (!secondary.eof()){
             getline(secondary, line);
+            if (line == ""){
+                cout << "from if" << endl;
+                continue;
+            } else{
+                cout << "Line : " << line << endl;
+            }
             parseLine(line, name, firstOffset, lastOffset);
             fillNames(linkedList, Names, name, firstOffset, lastOffset);
         }
@@ -148,7 +177,6 @@ public:
 
         getline(secondary, indexState);
         int stateLength = indexState.length();
-
         // check if index state is written will show -> if is upto date will check -> if map is already have data will do nothing -> if map is empty will put index file in it
         if (stateLength) {
             if (checkIndexUpToDate()) {
