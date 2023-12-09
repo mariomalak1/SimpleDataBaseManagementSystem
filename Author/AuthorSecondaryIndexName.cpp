@@ -158,11 +158,11 @@ public:
                 }
             }else{
                 // make new index file and write it
-                makeNewIndexFile(secondary, linkedList);
+                makeNewIndexFile();
             }
         }else{
             // make new index file and write it
-            makeNewIndexFile(secondary, linkedList);
+            makeNewIndexFile();
         }
     }
 
