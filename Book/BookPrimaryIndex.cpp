@@ -226,7 +226,7 @@ public:
     }
 
     // add id to index vector, then sort the vector, then write it
-    bool addAuthor(Book b, int offset){
+    bool addBook(Book b, int offset){
         try{
             loadIndex();
             setFlagOn();

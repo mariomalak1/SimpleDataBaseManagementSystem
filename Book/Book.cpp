@@ -56,7 +56,7 @@ public:
     }
 
     // get all data from user
-    static Book getValidAuthorDataFromUser(){
+    static Book getValidBookDataFromUser(){
         char authorID[SIZE], id[SIZE_ID], title[SIZE];
 
         cin.ignore();

@@ -69,7 +69,6 @@ public:
         if (deleted){
             // delete the author from all index files -->
             authorPrimaryIndex->deleteAuthor(ID);
-            authorSecondaryIndexName->loadIndex();
             authorSecondaryIndexName->deleteAuthor(*author);
 
             AuthorDataFile::updateNumOfRecordsInHeader(dataFile, -1);
