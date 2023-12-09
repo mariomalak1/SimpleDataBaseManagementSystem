@@ -7,7 +7,7 @@
 #include <algorithm>
 #include "BookDataFile.cpp"
 
-class AuthorPrimaryIndex{
+class BookPrimaryIndex{
 private:
     string indexState;
     const string FileName = "Data\\Indexes\\BookPrimaryIndex.txt";
