@@ -193,6 +193,13 @@ int main() {
 
 //    authorPrimaryIndex.writeIndexFile();
 
+//        BookDataFile bookDataFile = BookDataFile();
+//        Book book = Book("ISBN", "Title", "20210313");
+//        Book book2 = Book("ISBN2", "Title2", "20210404");
+//        int offset;
+//        bookDataFile.addBook(book, offset);
+//        bookDataFile.addBook(book2, offset);
+
 }
 
 

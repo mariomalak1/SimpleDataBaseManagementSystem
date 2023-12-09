@@ -189,7 +189,10 @@ CMakeFiles/SimpleDataBaseManagementSystem_.dir/main.cpp.obj: ../main.cpp \
   ../Author/AuthorPrimaryIndex.cpp \
   ../Author/AuthorSecondaryIndexName.cpp \
   ../queryProcessing.cpp \
-  ../Book/BookData.cpp
+  ../Book/BookData.cpp \
+  ../Book/BookDataFile.cpp \
+  ../Book/BookHeader.cpp \
+  ../Book/Book.cpp
 
 
 ../main.cpp:
@@ -502,6 +505,8 @@ D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/c
 
 D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/x86_64-w64-mingw32/bits/basic_file.h:
 
+../Book/BookDataFile.cpp:
+
 D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/fstream.tcc:
 
 D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/chrono:
@@ -569,3 +574,7 @@ D:/CLion-2021.3.3/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++/bits/u
 ../Author/AuthorPrimaryIndex.cpp:
 
 ../Book/BookData.cpp:
+
+../Book/BookHeader.cpp:
+
+../Book/Book.cpp:
