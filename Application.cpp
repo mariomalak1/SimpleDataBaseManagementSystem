@@ -17,6 +17,7 @@ private:
         cout << "7- Print Author (Author ID)" << endl;
         cout << "8- Print Book (ISBN)" << endl;
         cout << "9- Write Query" << endl;
+        cout << "f- Write Query" << endl;
         cout << "0- Exit" << endl;
     }
 
@@ -85,6 +86,21 @@ private:
         else if (response == "0") {
             cout << "Turn Off" << endl;
             exit(0);
+        }
+
+        else if (response == "f") {
+            string name;
+            cin.ignore();
+            getline(cin, name);
+            vector<Author> vector = authorData->searchWithName(name);
+            if (vector.size()){
+                for (int i = 0; i < vector.size(); ++i) {
+                    cout << vector[i] << endl;
+                }
+            }
+            else{
+                cout << "No Name equal : " << name << endl;
+            }
         }
         else{
             cerr << "please enter valid response" << endl;

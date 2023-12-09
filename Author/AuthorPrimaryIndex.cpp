@@ -200,6 +200,7 @@ public:
     }
 
     Author * search(string id, int &offset){
+        loadIndex();
         Author * author;
         if (vec.empty() || !checkIndexUpToDate()){
             loadIndex();
@@ -226,9 +227,10 @@ public:
     // add id to index vector, then sort the vector, then write it
     bool addAuthor(Author a, int offset){
         try{
+            loadIndex();
+            setFlagOn();
             fstream f;
             f.open(getFileName(), ios::out);
-            setFlagOn();
             map<string, int> map;
             map.insert(make_pair(a.getID(), offset));
             vec.push_back(map);
@@ -246,6 +248,7 @@ public:
 
     // delete the author from vector and write the index file again
     bool deleteAuthor(string id){
+        loadIndex();
         setFlagOn();
         // Find the map with the specified key using std::find_if
         auto mapToRemove = std::find_if(vec.begin(), vec.end(),[id](const map<string, int>& m)

@@ -1,98 +1,101 @@
-//#include "Application.cpp"
-#include "Author\AuthorSecondaryIndexName.cpp"
+#include "Application.cpp"
 
 int main() {
-// test secondary index here
+    Application application;
+    application.run();
 
-    AuthorSecondaryIndexName authorSecondaryIndexName;
-    AuthorPrimaryIndex authorPrimaryIndex;
-    authorSecondaryIndexName.loadIndex();
 
-//    cout << "After load" << endl;
-
+//    // test secondary index here
+//
+//    AuthorSecondaryIndexName authorSecondaryIndexName;
+//    AuthorPrimaryIndex authorPrimaryIndex;
+//    authorSecondaryIndexName.loadIndex();
+//
+////    cout << "After load" << endl;
+//
+////    for (const auto& pair : authorSecondaryIndexName.Names) {
+////        cout << "Name: " << pair.first << "  IDs : ";
+////        vector<string> vec = pair.second;
+////        for (int i = 0; i < vec.size(); ++i) {
+////            if (i == vec.size() - 1){
+////                cout << vec[i] << endl;
+////            }else{
+////                cout << vec[i] << "-";
+////            }
+////        }
+////    }
+//
+//
+//
+//
+////    cout << "After Print all names and ids in vector in secondary index" << endl;
+////    vector<Author> authors = {
+////        Author("2", "Name", "Address"),
+////        Author("21", "Name", "Address"),
+////        Author("213", "Name", "Address"),
+////        Author("2134", "Name", "Address"),
+////        Author("21345", "Name1", "Address"),
+////        Author("213456", "Name1", "Address"),
+////        Author("2134567", "Name2", "Address"),
+////        Author("21345678", "Name2", "Address"),
+////        Author("213456789", "Name0", "Address"),
+////        Author("2134567890", "Name1", "Address"),
+////    };
+////    int offset = 25;
+////
+////    for (auto r: authors) {
+////        authorPrimaryIndex.addAuthor(r, offset);
+////        authorSecondaryIndexName.addAuthor(r);
+////        offset += r.getLengthOfRecord();
+////    }
+//////
+////    authorSecondaryIndexName.writeIndexFile();
+////
+////    cout << "After Add Authors." << endl;
+//
+//
 //    for (const auto& pair : authorSecondaryIndexName.Names) {
-//        cout << "Name: " << pair.first << "  IDs : ";
 //        vector<string> vec = pair.second;
-//        for (int i = 0; i < vec.size(); ++i) {
-//            if (i == vec.size() - 1){
-//                cout << vec[i] << endl;
-//            }else{
-//                cout << vec[i] << "-";
+//
+//        if(vec.size()){
+//            cout << "Name: " << pair.first << "  IDs : ";
+//            for (int i = 0; i < vec.size(); ++i) {
+//                if (i == vec.size() - 1){
+//                    cout << vec[i] << endl;
+//                }else{
+//                    cout << vec[i] << "-";
+//                }
 //            }
+//        }else{
+//            cout << "Name : " << pair.first << " , Don't have IDs" << endl;
 //        }
 //    }
-
-
-
-
-//    cout << "After Print all names and ids in vector in secondary index" << endl;
-//    vector<Author> authors = {
-//        Author("2", "Name", "Address"),
-//        Author("21", "Name", "Address"),
-//        Author("213", "Name", "Address"),
-//        Author("2134", "Name", "Address"),
-//        Author("21345", "Name1", "Address"),
-//        Author("213456", "Name1", "Address"),
-//        Author("2134567", "Name2", "Address"),
-//        Author("21345678", "Name2", "Address"),
-//        Author("213456789", "Name0", "Address"),
-//        Author("2134567890", "Name1", "Address"),
-//    };
-//    int offset = 25;
 //
-//    for (auto r: authors) {
-//        authorPrimaryIndex.addAuthor(r, offset);
-//        authorSecondaryIndexName.addAuthor(r);
-//        offset += r.getLengthOfRecord();
+//
+//    string  arr [] = {"Name", "name", "Name1", "Name2", "Name0"};
+//
+//    for (int i = 0; i < 5; ++i) {
+//        vector<Author> vector = authorSecondaryIndexName.search(arr[i]);
+//        if (vector.size()){
+//            cout << "Name : " << arr[i] << " IDs : ";
+//            for (int j = 0; j < vector.size(); ++j) {
+//                cout << vector[i] << endl;
+//            }
+//        }else{
+//            cout << "No Author with this Name : " << arr[i] << endl;
+//        }
+//
 //    }
-////
-//    authorSecondaryIndexName.writeIndexFile();
 //
-//    cout << "After Add Authors." << endl;
-
-
-    for (const auto& pair : authorSecondaryIndexName.Names) {
-        vector<string> vec = pair.second;
-
-        if(vec.size()){
-            cout << "Name: " << pair.first << "  IDs : ";
-            for (int i = 0; i < vec.size(); ++i) {
-                if (i == vec.size() - 1){
-                    cout << vec[i] << endl;
-                }else{
-                    cout << vec[i] << "-";
-                }
-            }
-        }else{
-            cout << "Name : " << pair.first << " , Don't have IDs" << endl;
-        }
-    }
-
-
-    string  arr [] = {"Name", "name", "Name1", "Name2", "Name0"};
-
-    for (int i = 0; i < 5; ++i) {
-        vector<Author> vector = authorSecondaryIndexName.search(arr[i]);
-        if (vector.size()){
-            cout << "Name : " << arr[i] << " IDs : ";
-            for (int j = 0; j < vector.size(); ++j) {
-                cout << vector[i] << endl;
-            }
-        }else{
-            cout << "No Author with this Name : " << arr[i] << endl;
-        }
-
-    }
-
-
-    cout << "after secondary index search " << endl;
-
-
-    for (int i = 0; i < authorPrimaryIndex.vec.size(); ++i) {
-        cout << authorPrimaryIndex.vec[i].begin()->first << "|" << authorPrimaryIndex.vec[i].begin()->second << endl;
-    }
-
-    cout << "end" << endl;
+//
+//    cout << "after secondary index search " << endl;
+//
+//
+//    for (int i = 0; i < authorPrimaryIndex.vec.size(); ++i) {
+//        cout << authorPrimaryIndex.vec[i].begin()->first << "|" << authorPrimaryIndex.vec[i].begin()->second << endl;
+//    }
+//
+//    cout << "end" << endl;
 
 // end testing
 

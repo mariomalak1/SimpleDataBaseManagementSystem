@@ -1,5 +1,3 @@
 OFF
-Name|0|13
-Name0|14|23
-Name1|24|47
-Name2|48|64
+bassem|0|8
+mario|9|30

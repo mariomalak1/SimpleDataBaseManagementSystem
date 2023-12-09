@@ -8,17 +8,15 @@
 class AuthorData{
 private:
     AuthorPrimaryIndex * authorPrimaryIndex;
+    AuthorSecondaryIndexName * authorSecondaryIndexName;
     AuthorDataFile authorData;
 public:
-
     AuthorData(){
         authorPrimaryIndex = new AuthorPrimaryIndex();
+        authorSecondaryIndexName = new AuthorSecondaryIndexName();
     }
 
     bool addAuthor(){
-        authorPrimaryIndex->loadIndex();
-        authorPrimaryIndex->setFlagOn();
-
         // get the data from the user
         Author author = Author::getValidAuthorDataFromUser();
         int authorOffset;
@@ -34,9 +32,13 @@ public:
             // then go to write it in the index file
             authorPrimaryIndex->setFlagOff();
             authorPrimaryIndex->addAuthor(author, authorOffset);
+
+            authorSecondaryIndexName->setFlagOff();
+            authorSecondaryIndexName->addAuthor(author);
             return true;
         }
         else {
+            authorSecondaryIndexName->setFlagOff();
             authorPrimaryIndex->setFlagOff();
             return false;
         }
@@ -65,8 +67,11 @@ public:
         bool deleted = AuthorDataFile::deleteAuthorFromFile(dataFile, offset, author->getLengthOfRecord());
 
         if (deleted){
-            authorPrimaryIndex->deleteAuthor(ID);
             // delete the author from all index files -->
+            authorPrimaryIndex->deleteAuthor(ID);
+            authorSecondaryIndexName->loadIndex();
+            authorSecondaryIndexName->deleteAuthor(*author);
+
             AuthorDataFile::updateNumOfRecordsInHeader(dataFile, -1);
             return true;
         }
@@ -81,6 +86,10 @@ public:
         // delete the author from all index files
 
         return true;
+    }
+
+    vector<Author> searchWithName(string name){
+        return authorSecondaryIndexName->search(name);
     }
 };
 

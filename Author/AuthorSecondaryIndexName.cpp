@@ -175,9 +175,26 @@ private:
         }
     }
 
+    // Convert the string to lowercase
+    string lowerCase(string str){
+        string string1;
+        for (char &c : str) {
+            string1 += tolower(c);
+        }
+        return string1;
+    }
+
 public:
     //  map that hold unique names for authors and vector of IDs of all of this names
     map<string, vector<string>> Names;
+
+    void setFlagOff(){
+        indexState = "OFF";
+    }
+
+    void setFlagON(){
+        indexState = "ON";
+    }
 
     // will read index file to memory
     void loadIndex(){
@@ -206,9 +223,10 @@ public:
 
     // return with all authors with that name
     vector<Author> search(string name){
+        loadIndex();
         vector<Author> authors;
         try{
-            auto it = Names.find(name);
+            auto it = Names.find(lowerCase(name));
             if (it != Names.end()){
                 putAllAuthorsWithSameNameInVec(it->second, authors);
             }
@@ -229,15 +247,19 @@ public:
 
     bool addAuthor(Author a){
         try{
-            auto it = Names.find(a.getName());
+            loadIndex();
+            setFlagON();
+            auto it = Names.find(lowerCase(a.getName()));
             if (it != Names.end()){
                 it->second.push_back(a.getID());
             }
             else{
                 vector<string> vect = vector<string>();
                 vect.push_back(a.getID());
-                Names.insert(make_pair(a.getName(), vect));
+                Names.insert(make_pair(lowerCase(a.getName()), vect));
             }
+            setFlagOff();
+            writeIndexFile();
             return true;
         }
         catch (...){
@@ -248,20 +270,33 @@ public:
 
     bool deleteAuthor(Author a){
         try{
-            auto it = Names.find(a.getName());
+            loadIndex();
+            setFlagON();
+            auto it = Names.find(lowerCase(a.getName()));
             if (it != Names.end()){
                 // search for author with this id and delete it
-                vector<string> vec = it->second;
-                auto authorId = std::find(vec.begin(), vec.end(), a.getID());
+                auto authorId = find(it->second.begin(), it->second.end(), a.getID());
 
-                if (authorId != vec.end()) {
-                    vec.erase(authorId);
+                if (authorId != it->second.end()) {
+                    // remove the hole name
+                    if (it->second.size() == 1){
+                        Names.erase(it);
+                    }else{
+                        // remove element from the vector
+                        it->second.erase(authorId);
+                    }
+
+                    setFlagOff();
+                    writeIndexFile();
                     return true;
                 }else{
+                    cout << "Not Found" << endl;
+                    setFlagOff();
                     return false;
                 }
             }
             else{
+                setFlagOff();
                 return false;
             }
         }
@@ -273,26 +308,31 @@ public:
 
     bool deleteAllAuthorsWithName(string name){
         // Find the iterator pointing to the element with key 2
+        loadIndex();
+        setFlagON();
         auto it = Names.find(name);
 
         // Check if the element is found before erasing
         if (it != Names.end()) {
             // Erase the element
             Names.erase(it);
+            setFlagOff();
+            writeIndexFile();
             return true;
         }
+        setFlagOff();
         return false;
     }
 
     // must put indexState with a value
     void writeIndexFile(){
-        fstream Secondary, linkedList;
-        Secondary.open(getFileName(), ios::out | ios::in);
-        linkedList.open(getIDsLinkedListFileName(), ios::out | ios::in);
+        fstream secondary, linkedList;
+        secondary.open(getFileName(), ios::out);
+        linkedList.open(getIDsLinkedListFileName(), ios::out);
 
-        Secondary.seekp(0, ios::beg);
+        secondary.seekp(0, ios::beg);
 
-        Secondary << indexState << '\n';
+        secondary << indexState << '\n';
 
         int offset = 0, firstOffset;
         linkedList.seekp(offset, ios::beg);
@@ -311,14 +351,9 @@ public:
                     linkedList << vec[i] << "-";
                 }
             }
-
-
-            Secondary << pair.first << "|" << firstOffset << "|" << offset << "\n";
+            secondary << pair.first << "|" << firstOffset << "|" << offset << "\n";
             offset++;
         }
-
-        Secondary.close();
-        linkedList.close();
     }
 
     AuthorSecondaryIndexName(){
