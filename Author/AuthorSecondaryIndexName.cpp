@@ -105,7 +105,7 @@ private:
     void parseLineOfIDsFillVector(char* buffer, streamsize len, vector<string> &vec){
         int i = 0;
         string id;
-        while (i <= len){
+        while (i < len){
             if (buffer[i] != '-'){
                 id += buffer[i];
             }
@@ -115,6 +115,7 @@ private:
             }
             i++;
         }
+        vec.push_back(id);
     }
 
     // function to put name in map and IDs in vector
@@ -124,8 +125,9 @@ private:
 
         streamsize numBytesToRead = lastOffset - firstOffset;
 
-        char* buffer = new char[numBytesToRead];
+        char* buffer = new char[numBytesToRead + 1];
         linkedList.read(buffer, numBytesToRead);
+        buffer[numBytesToRead] = '\0';
 
 
         vector<string>IDs;
@@ -155,6 +157,9 @@ private:
             }
             parseLine(line, name, firstOffset, lastOffset);
             fillNames(linkedList, Names, name, firstOffset, lastOffset);
+            name = "";
+            firstOffset = 0;
+            lastOffset = 0;
         }
     }
 
@@ -289,20 +294,19 @@ public:
 
         Secondary << indexState << '\n';
 
-        int offset = 0;
+        int offset = 0, firstOffset;
         linkedList.seekp(offset, ios::beg);
 
         for (const auto& pair : Names) {
             vector<string> vec = pair.second;
-            int firstOffset = offset;
+            firstOffset = offset;
 
             // name of author | offset of first location of id in this name | offset of last location of IDs
             for (int i = 0; i < vec.size(); ++i) {
                 if (i == vec.size() - 1){
                     linkedList << vec[i];
-                    offset += linkedList.tellp();
+                    offset = linkedList.tellp();
                     linkedList << "|";
-                    offset++;
                 }else{
                     linkedList << vec[i] << "-";
                 }
@@ -310,6 +314,7 @@ public:
 
 
             Secondary << pair.first << "|" << firstOffset << "|" << offset << "\n";
+            offset++;
         }
 
         Secondary.close();

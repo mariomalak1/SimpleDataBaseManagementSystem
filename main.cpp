@@ -8,20 +8,24 @@ int main() {
     AuthorPrimaryIndex authorPrimaryIndex;
     authorSecondaryIndexName.loadIndex();
 
-    cout << "After load" << endl;
+//    cout << "After load" << endl;
 
-    for (const auto& pair : authorSecondaryIndexName.Names) {
-        cout << "Name: " << pair.first << "  IDs : ";
-        vector<string> vec = pair.second;
-        for (int i = 0; i < vec.size(); ++i) {
-            if (i == vec.size() - 1){
-                cout << vec[i] << endl;
-            }else{
-                cout << vec[i] << "-";
-            }
-        }
-    }
+//    for (const auto& pair : authorSecondaryIndexName.Names) {
+//        cout << "Name: " << pair.first << "  IDs : ";
+//        vector<string> vec = pair.second;
+//        for (int i = 0; i < vec.size(); ++i) {
+//            if (i == vec.size() - 1){
+//                cout << vec[i] << endl;
+//            }else{
+//                cout << vec[i] << "-";
+//            }
+//        }
+//    }
 
+
+
+
+//    cout << "After Print all names and ids in vector in secondary index" << endl;
 //    vector<Author> authors = {
 //        Author("2", "Name", "Address"),
 //        Author("21", "Name", "Address"),
@@ -41,8 +45,28 @@ int main() {
 //        authorSecondaryIndexName.addAuthor(r);
 //        offset += r.getLengthOfRecord();
 //    }
-//
+////
 //    authorSecondaryIndexName.writeIndexFile();
+//
+//    cout << "After Add Authors." << endl;
+
+
+    for (const auto& pair : authorSecondaryIndexName.Names) {
+        vector<string> vec = pair.second;
+
+        if(vec.size()){
+            cout << "Name: " << pair.first << "  IDs : ";
+            for (int i = 0; i < vec.size(); ++i) {
+                if (i == vec.size() - 1){
+                    cout << vec[i] << endl;
+                }else{
+                    cout << vec[i] << "-";
+                }
+            }
+        }else{
+            cout << "Name : " << pair.first << " , Don't have IDs" << endl;
+        }
+    }
 
 
     string  arr [] = {"Name", "name", "Name1", "Name2", "Name0"};
@@ -61,6 +85,14 @@ int main() {
     }
 
 
+    cout << "after secondary index search " << endl;
+
+
+    for (int i = 0; i < authorPrimaryIndex.vec.size(); ++i) {
+        cout << authorPrimaryIndex.vec[i].begin()->first << "|" << authorPrimaryIndex.vec[i].begin()->second << endl;
+    }
+
+    cout << "end" << endl;
 
 // end testing
 

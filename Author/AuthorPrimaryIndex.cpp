@@ -206,7 +206,6 @@ public:
         }
         int index = binarySearchInVector(vec, id);
 
-
         if (index != -1){
             fstream f;
             f.open(AuthorDataFile::getFileName(), ios::in);

@@ -1,5 +1,5 @@
 OFF
-Name|0|14
-Name0|14|38
-Name1|38|86
-Name2|86|151
+Name|0|13
+Name0|14|23
+Name1|24|47
+Name2|48|64
