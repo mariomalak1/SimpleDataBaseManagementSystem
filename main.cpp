@@ -1,8 +1,58 @@
-#include "Application.cpp"
+//#include "Application.cpp"
+#include "Author\AuthorSecondaryIndexName.cpp"
 
 int main() {
-    Application application = Application();
-    application.run();
+// test secondary index here
+
+    AuthorSecondaryIndexName authorSecondaryIndexName;
+    authorSecondaryIndexName.loadIndex();
+
+    for (const auto& pair : authorSecondaryIndexName.Names) {
+        cout << "Name: " << pair.first << "IDs : ";
+        vector<string> vec = pair.second;
+        for (int i = 0; i < vec.size(); ++i) {
+            if (i == vec.size() - 1){
+                cout << vec[i] << endl;
+            }else{
+                cout << vec[i] << "-";
+            }
+        }
+    }
+
+//    Author author = Author("2", "Name", "Address");
+//    authorSecondaryIndexName.addAuthor(author, 799);
+//
+//        Author author1 = Author("21", "Name", "Address");
+//    authorSecondaryIndexName.addAuthor(author1, 799);
+////
+//        Author author2 = Author("213", "Name", "Address");
+//    authorSecondaryIndexName.addAuthor(author2, 799);
+////
+//        Author author3 = Author("2134", "Name", "Address");
+//    authorSecondaryIndexName.addAuthor(author3, 799);
+////
+//    string  arr [] = {"20210313", "kariakos", "202131354", "126315", "ID22"};
+//
+//    for (int i = 0; i < 5; ++i) {
+//        Author * author = authorSecondaryIndexName.search(arr[i]);
+//        if (author != nullptr){
+//            cout << *author << endl;
+//        }else{
+//            cout << "not founded author with id -> " << arr[i] << endl;
+//        }
+//    }
+////
+////
+//    authorSecondaryIndexName.writeIndexFile();
+////
+
+
+// end testing
+
+
+
+//    Application application = Application();
+//    application.run();
 
 //    // search with id in primary index
 //    AuthorData authorData = AuthorData();
@@ -17,17 +67,17 @@ int main() {
 //        }
 //    }
 
-    string id;
-    AuthorData authorData = AuthorData();
-    while (true){
-        getline(cin, id);
-        if (id == "-1"){
-            exit(0);
-        }
-
-        cout << authorData.deleteAuthor(id) << endl;
-    }
-
+//    string id;
+//    AuthorData authorData = AuthorData();
+//    while (true){
+//        getline(cin, id);
+//        if (id == "-1"){
+//            exit(0);
+//        }
+//
+//        cout << authorData.deleteAuthor(id) << endl;
+//    }
+//
 //    AuthorData authorData = AuthorData();
 ////    Author author = Author("ID", "Name", "Address");
 ////    Author author2 = Author("ID2", "Name2", "Address2");

@@ -2,7 +2,8 @@
 #define SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORSECONDARYINDEXNAME_H
 
 #include <iostream>
-#include <set>
+#include <map>
+#include <vector>
 #include "AuthorPrimaryIndex.cpp"
 using namespace std;
 
@@ -10,9 +11,7 @@ class AuthorSecondaryIndexName{
 private:
     string indexState;
     const string FileName = "Data\\Indexes\\AuthorSecondaryIndexName.txt";
-
-    //  map that hold unique names for authors and vector of IDs of all of this names
-    map<string, vector<string>> Names;
+    const string IDsLinkedList = "Data\\Indexes\\LinkedLists\\AuthorIDs.txt";
 
     // to check on the index is upto date or not
     bool checkIndexUpToDate(){
@@ -26,12 +25,104 @@ private:
         }
     }
 
-    void readFileDataPutInMemory(fstream &dataFile);
+    void readFileDataPutInMemory(fstream &dataFile){
+        // check if the data file is first once open
+        AuthorDataFile::checkFileIsFirstOpen(dataFile);
 
-    void makeNewIndexFile(fstream &indexFile);
+    }
+
+    void makeNewIndexFile(){
+        fstream dataFile;
+        dataFile.open(AuthorDataFile::getFileName(), ios::in);
+        // put all data in data file
+        readFileDataPutInMemory(dataFile);
+
+        // flag it as upto date
+        indexState = "OFF";
+
+        // write index file
+        writeIndexFile();
+    }
+
+    // to parse line to name and first offset and last offset
+    void parseLine(string line, string &name, int &firstOffset, int &lastOffset){
+        int i = 0;
+        while (true){
+            if (line[i] == '|'){
+                break;
+            }
+            name += line[i];
+            i++;
+        }
+        string stringFirstOffset, stringLastOffset;
+        while (true){
+            if (line[i] == '|'){
+                break;
+            }
+            stringFirstOffset += line[i];
+            i++;
+        }
+        firstOffset = stoi(stringFirstOffset);
+
+        while (true){
+            if (line[i] == '|'){
+                break;
+            }
+            stringLastOffset += line[i];
+            i++;
+        }
+        lastOffset = stoi(stringLastOffset);
+    }
+
+    void parseLineOfIDsFillVector(char* buffer, streamsize len, vector<string> &vec){
+        int i = 0;
+        string id;
+        while (i <= len){
+            if (buffer[i] != '-'){
+                id += buffer[i];
+            }
+            else{
+                vec.push_back(id);
+                id = "";
+            }
+            i++;
+        }
+    }
+
+    // function to put name in map and IDs in vector
+    void fillNames(fstream &linkedList, map<string, vector<string>> &map, string name, int firstOffset, int lastOffset){
+        linkedList.seekg(firstOffset, ios::beg);
+        streamsize numBytesToRead = firstOffset - lastOffset;
+
+        char* buffer = new char[numBytesToRead];
+        linkedList.read(buffer, numBytesToRead);
+
+        vector<string>IDs;
+        parseLineOfIDsFillVector(buffer, numBytesToRead,  IDs);
+
+        map.insert(make_pair(name, IDs));
+
+        delete[] buffer;
+    }
 
     // function to load the index file inside the vector -> put indexState with a value to put the index file in memory
-    void putIndexFileInMemory(fstream &f);
+    void putIndexFileInMemory(fstream &secondary, fstream &linkedList){
+        if (!indexState.length()){
+            return;
+        }
+        secondary.seekg(indexState.length() + 1, ios::beg);
+        string line;
+
+        // int to hold first and last offset of location of IDs
+        int firstOffset, lastOffset;
+        // string to hold name of author
+        string name;
+        while (!secondary.eof()){
+            getline(secondary, line);
+            parseLine(line, name, firstOffset, lastOffset);
+            fillNames(linkedList, Names, name, firstOffset, lastOffset);
+        }
+    }
 
     void putAllAuthorsWithSameNameInVec(const vector<string> &vecOfIDs, vector<Author> &vecOfAuthors){
         AuthorPrimaryIndex authorPrimaryIndex = AuthorPrimaryIndex();
@@ -46,6 +137,35 @@ private:
     }
 
 public:
+    //  map that hold unique names for authors and vector of IDs of all of this names
+    map<string, vector<string>> Names;
+
+    // will read index file to memory
+    void loadIndex(){
+        fstream secondary, linkedList;
+        secondary.open(getFileName(), ios::out | ios::in);
+        linkedList.open(getIDsLinkedListFileName(), ios::out | ios::in);
+
+        getline(secondary, indexState);
+        int stateLength = indexState.length();
+
+        // check if index state is written will show -> if is upto date will check -> if map is already have data will do nothing -> if map is empty will put index file in it
+        if (stateLength) {
+            if (checkIndexUpToDate()) {
+                if (Names.empty()) {
+                    putIndexFileInMemory(secondary, linkedList);
+                    return;
+                }
+            }else{
+                // make new index file and write it
+                makeNewIndexFile(secondary, linkedList);
+            }
+        }else{
+            // make new index file and write it
+            makeNewIndexFile(secondary, linkedList);
+        }
+    }
+
     // return with all authors with that name
     vector<Author> search(string name){
         vector<Author> authors;
@@ -63,6 +183,10 @@ public:
 
     string getFileName(){
         return FileName;
+    }
+
+    string getIDsLinkedListFileName(){
+        return IDsLinkedList;
     }
 
     bool addAuthor(Author a){
@@ -123,7 +247,39 @@ public:
     }
 
     // must put indexState with a value
-    void writeIndexFile();
+    void writeIndexFile(){
+        fstream Secondary, linkedList;
+        Secondary.open(getFileName(), ios::out | ios::in);
+        linkedList.open(getIDsLinkedListFileName(), ios::out | ios::in);
+
+        Secondary.seekp(0, ios::beg);
+
+        Secondary << indexState << '\n';
+
+        int offset = 0;
+        linkedList.seekp(offset, ios::beg);
+
+        for (const auto& pair : Names) {
+            vector<string> vec = pair.second;
+            int firstOffset = offset;
+
+            // name of author | offset of first location of id in this name | offset of last location of IDs
+            for (int i = 0; i < vec.size(); ++i) {
+                if (i == vec.size() - 1){
+                    linkedList << vec[i] << "|";
+                }else{
+                    linkedList << vec[i] << "-";
+                }
+            }
+
+            offset += linkedList.tellp();
+
+            Secondary << pair.first << "|" << firstOffset << "|" << offset << "\n";
+        }
+
+        Secondary.close();
+        linkedList.close();
+    }
 
     AuthorSecondaryIndexName(){
         Names = map<string, vector<string>>();

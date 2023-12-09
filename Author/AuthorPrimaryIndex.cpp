@@ -46,7 +46,7 @@ private:
         }
     }
 
-    void makeNewIndexFile(fstream &indexFile){
+    void makeNewIndexFile(){
         fstream dataFile;
         dataFile.open(AuthorDataFile::getFileName(), ios::in);
         // put all data in data file
@@ -186,11 +186,11 @@ public:
                 }
                 else{
                     // make new index file and write it
-                    makeNewIndexFile(f);
+                    makeNewIndexFile();
                 }
             }else{
                 // make new index file and write it
-                makeNewIndexFile(f);
+                makeNewIndexFile();
             }
         }
         else{

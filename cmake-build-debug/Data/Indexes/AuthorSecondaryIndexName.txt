@@ -1,0 +1,4 @@
+OFF
+Ahmed|0|25|
+Mario|26|45|
+Malak|46|99|
