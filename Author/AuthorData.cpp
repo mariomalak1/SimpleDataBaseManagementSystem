@@ -59,7 +59,11 @@ public:
 
         // delete all books with this author id -> with all indexes for books
         BookData bookData = BookData();
-        bookData.AllBooksWrittenByAuthor(author->getID());
+        vector<Book> booksWrittenByAuthor = bookData.AllBooksWrittenByAuthor(author->getID());
+
+        for (Book b: booksWrittenByAuthor) {
+            bookData.deleteBook(b.getID());
+        }
 
         // delete from the data file
         fstream dataFile;
