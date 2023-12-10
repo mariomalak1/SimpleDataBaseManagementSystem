@@ -42,12 +42,14 @@ private:
             if (it != AuthorIDs.end()) {
                 // the author id is found
                 it->second.push_back(book->getID());
+                sort(it->second.begin(), it->second.end());
             }
             else{
                 vector<string> IDs;
                 IDs.push_back(book->getID());
                 AuthorIDs.insert(make_pair(book->getAuthorID(), IDs));
             }
+
             int recordLength = book->getLengthOfRecord();
             offset += recordLength + to_string(recordLength).length() + lengthDeletedRecords;
         }
@@ -127,9 +129,11 @@ private:
         linkedList.read(buffer, numBytesToRead);
         buffer[numBytesToRead] = '\0';
 
-
         vector<string>IDs;
         parseLineOfIDsFillVector(buffer, numBytesToRead,  IDs);
+
+        // sort vector of IDs to perform search operations
+        sort(IDs.begin(), IDs.end());
 
         map.insert(make_pair(name, IDs));
 
@@ -180,6 +184,26 @@ private:
             string1 += tolower(c);
         }
         return string1;
+    }
+
+    // Function to perform binary search on a sorted vector of strings
+    int binarySearch(const vector<string>& vector, const string& target) {
+        int left = 0;
+        int right = vector.size() - 1;
+
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+
+            if (vector[mid] == target) {
+                return mid;
+            } else if (vector[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+
+        return -1;  // Element not found
     }
 
 public:
@@ -249,7 +273,10 @@ public:
             setFlagON();
             auto it = AuthorIDs.find(lowerCase(b.getAuthorID()));
             if (it != AuthorIDs.end()){
-                it->second.push_back(b.getID());
+                if (binarySearch(it->second, b.getID()) == -1){
+                    it->second.push_back(b.getID());
+                    sort(it->second.begin(), it->second.end());
+                }
             }
             else{
                 vector<string> vect = vector<string>();

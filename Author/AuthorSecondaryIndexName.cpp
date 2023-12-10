@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <algorithm>
 #include "AuthorPrimaryIndex.cpp"
 using namespace std;
 
@@ -43,12 +44,14 @@ private:
             if (it != Names.end()) {
                 // the name is found
                 it->second.push_back(author->getID());
+                sort(it->second.begin(), it->second.end());
             }
             else{
                 vector<string> IDs;
                 IDs.push_back(author->getID());
                 Names.insert(make_pair(author->getName(), IDs));
             }
+
             int recordLength = author->getLengthOfRecord();
             offset += recordLength + to_string(recordLength).length() + lengthDeletedRecords;
         }
@@ -133,6 +136,8 @@ private:
         vector<string>IDs;
         parseLineOfIDsFillVector(buffer, numBytesToRead,  IDs);
 
+        // sort vector of IDs to perform search operations
+        sort(IDs.begin(), IDs.end());
         map.insert(make_pair(name, IDs));
 
         delete[] buffer;
@@ -182,6 +187,26 @@ private:
             string1 += tolower(c);
         }
         return string1;
+    }
+
+    // Function to perform binary search on a sorted vector of strings
+    int binarySearch(const vector<string>& vector, const string& target) {
+        int left = 0;
+        int right = vector.size() - 1;
+
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+
+            if (vector[mid] == target) {
+                return mid;
+            } else if (vector[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+
+        return -1;  // Element not found
     }
 
 public:
@@ -251,7 +276,10 @@ public:
             setFlagON();
             auto it = Names.find(lowerCase(a.getName()));
             if (it != Names.end()){
-                it->second.push_back(a.getID());
+                if (binarySearch(it->second, a.getID()) == -1){
+                    it->second.push_back(a.getID());
+                    sort(it->second.begin(), it->second.end());
+                }
             }
             else{
                 vector<string> vect = vector<string>();
@@ -290,7 +318,6 @@ public:
                     writeIndexFile();
                     return true;
                 }else{
-                    cout << "Not Found" << endl;
                     setFlagOff();
                     return false;
                 }
