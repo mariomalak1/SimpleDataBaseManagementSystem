@@ -29,17 +29,22 @@ public:
 
         // check that author id in book is added before
         AuthorPrimaryIndex authorPrimaryIndex = AuthorPrimaryIndex();
-        int authorOffset;
-        if (authorPrimaryIndex.search(book.getAuthorID(), authorOffset) == nullptr){
+        int authorOffset = 0;
+        Author * author = authorPrimaryIndex.search(book.getAuthorID(), authorOffset);
+        if (author == nullptr){
             cerr << "You can't add book for author didn't entered before." << endl;
             return false;
         }
+
+        cout << *author << endl;
 
         if(bookData.addBook(book, bookOffset)){
             // add in index file -> automatically sort the file again in the memory
             // then go to write it in the index file
             bookPrimaryIndex->setFlagOff();
             bookPrimaryIndex->addBook(book, bookOffset);
+
+            cout << "after search in primary" << endl;
 
             bookSecondaryIndexAuthorIDs->setFlagOff();
             bookSecondaryIndexAuthorIDs->addBook(book);

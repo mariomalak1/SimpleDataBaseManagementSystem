@@ -200,9 +200,8 @@ public:
     }
 
     Author * search(string id, int &offset){
-        loadIndex();
         Author * author;
-        if (vec.empty() || !checkIndexUpToDate()){
+        if (!checkIndexUpToDate()){
             loadIndex();
         }
         int index = binarySearchInVector(vec, id);
@@ -210,6 +209,9 @@ public:
         if (index != -1){
             fstream f;
             f.open(AuthorDataFile::getFileName(), ios::in);
+
+            cout << "vec first : " << vec[index].begin()->first << endl;
+            cout << "vec second : " << vec[index].begin()->second << endl;
 
             offset = vec[index].begin()->second;
             int lengthDeletedRecords = 0;
@@ -270,7 +272,7 @@ public:
     // must put indexState with a value
     void writeIndexFile(){
         fstream f;
-        f.open(getFileName(), ios::out | ios::in);
+        f.open(getFileName(), ios::out);
         if (!f.is_open()){
             cerr << "Error While Write Index File." << endl;
             return;

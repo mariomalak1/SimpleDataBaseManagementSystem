@@ -33,7 +33,7 @@ private:
 
     static void copyStringToArray(const string& inputString, char* outputArray, int arraySize) {
         strncpy(outputArray, inputString.c_str(), arraySize - 1);
-        outputArray[arraySize - 1] = '\0'; // Ensure null-termination
+        outputArray[arraySize - 1] = '\0';
     }
 
     // function to format the string to put zero's

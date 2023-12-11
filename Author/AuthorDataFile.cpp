@@ -22,7 +22,7 @@ class Author{
 public:
     static const int SIZE = 30;
     static const int SIZE_ID = 15;
-    static const int NORMAL_LENGTH = 15;
+    static const int NORMAL_LENGTH = 9;
 private:
     char ID [SIZE_ID];
     char Name [SIZE];
@@ -363,20 +363,35 @@ private:
     }
 
     // to delete the remaining part after addition
-    static bool deletePart(fstream &file, int offset, int newAddedLength, int oldLength, bool &putInAvailList){
+    static bool deletePart(fstream &file, int offset, int newAddedLength, int oldLength, bool &putInAvailList, int &addedSpaces){
         if(file.is_open()){
-            // part len = old len - new len - (length indicator of new record)
-            int partLength = oldLength - newAddedLength - 2;
-
-            if (partLength >= Author::NORMAL_LENGTH){
-                putInAvailList = true;
-                return deleteAuthorFromFile(file, offset, partLength);
-            }
-            else{
+            if (oldLength == newAddedLength){
                 putInAvailList = false;
-                file.seekp(offset + newAddedLength + 2 , ios::beg);
-                file << "*|" << to_string(partLength) << "|";
                 return true;
+            }
+            // if the old >= new record length +  length indicator + length of (*|<0-9>)
+            else if (oldLength > newAddedLength + (2) + (3)){
+                // part len = old len - new len - (length indicator of new record)
+                int partLength = oldLength - newAddedLength - 2;
+
+                if (partLength > Author::NORMAL_LENGTH){
+                    putInAvailList = true;
+                    return deleteAuthorFromFile(file, offset, partLength);
+                }
+                else{
+                    putInAvailList = false;
+                    file.seekp(offset + newAddedLength + 2 , ios::beg);
+                    file << "*|" << to_string(partLength) << "|";
+                    return true;
+                }
+            }else{
+                int remainingPart = oldLength - (newAddedLength + 2);
+                file.seekp(offset + newAddedLength + 2 , ios::beg);
+                while (remainingPart > 0){
+                    file.put(' ');
+                    remainingPart--;
+                    addedSpaces++;
+                }
             }
         }
         else{
@@ -489,7 +504,7 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
 
     AuthorHeader::readHeaderRecord(file);
 
-    int recordLength = author.getLengthOfRecord();
+    int recordLength = author.getLengthOfRecord() + 2;
     int suitableOffsetIfFound = availList(recordLength, file);
     if (suitableOffsetIfFound != -1){
         int oldLength = readLengthOfNodeInAvailList(file, suitableOffsetIfFound);
@@ -500,9 +515,21 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
         }
         else{
             bool putInAvailList;
+            int addedSpaces = 0;
             // mark the remaining part as deleted
-            if (deletePart(file, suitableOffsetIfFound, author.getLengthOfRecord(), oldLength, putInAvailList)){
+            if (deletePart(file, suitableOffsetIfFound, author.getLengthOfRecord(), oldLength, putInAvailList, addedSpaces)){
                 if (!putInAvailList){
+                    if (addedSpaces){
+                        char address [author.getAddress().length() + addedSpaces + 1];
+                        strncpy(address, author.getAddress().c_str(), author.getAddress().length());
+                        address[author.getAddress().length() + addedSpaces] = '\0';
+                        int i = 1;
+                        while (addedSpaces > 0){
+                            address[author.getAddress().length() + i] = ' ';
+                            addedSpaces--;
+                        }
+                        author.setAddress(address);
+                    }
                     // change the pointer that point to this node to the next node
                     removeFromAvailList(file, suitableOffsetIfFound);
                 }
@@ -516,7 +543,6 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
     else {
         file.seekp(0, ios::end);
     }
-
     authorOffset = file.tellp();
     file << author;
 

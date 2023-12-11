@@ -207,7 +207,6 @@ public:
             loadIndex();
         }
         int index = binarySearchInVector(vec, isbn);
-
         if (index != -1){
             fstream f;
             f.open(BookDataFile::getFileName(), ios::in);

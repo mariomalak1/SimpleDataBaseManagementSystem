@@ -11,7 +11,7 @@ class Book{
 public:
     static const int SIZE = 30;
     static const int SIZE_ID = 15;
-    static const int NORMAL_LENGTH = 15;
+    static const int NORMAL_LENGTH = 9;
 private:
     char ISBN [SIZE_ID]; //primary key
     char BookTitle [SIZE];

@@ -1,6 +1,3 @@
 OFF
-aasdasd|0|14
-asas|15|22
-asdasds|23|29
-assa|30|35
-sadasd|36|39
+mARIo|0|5
+mario|6|10
