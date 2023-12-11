@@ -199,6 +199,7 @@ public:
         string stringOffsetOfNext = to_string(offsetOfNext);
 
         if (stringOffsetOfCurrent.length() != stringOffsetOfNext.length()){
+            // get len of current -> to make new rec with the new pointer
             f.seekg(stringOffsetOfCurrent.length() + 1, ios::cur);
             char c;
             string len;
@@ -216,7 +217,8 @@ public:
             }else{
                 length += (stringOffsetOfNext.length() - stringOffsetOfCurrent.length());
             }
-            string record = "*" + stringOffsetOfNext + "|" + to_string(length);
+
+            string record = "*" + stringOffsetOfNext + "|" + to_string(length) + "|";
             f.seekp(offsetOfPrevious, ios::beg);
             f << record;
         }

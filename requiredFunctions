@@ -1,2 +1,3 @@
-need to delete the remaining part of delete record after replace part of it
-when delete it not delete records like 43, and many records doesn't
+not added in avail list in book  --- check the avail list at all in book
+when delete author, delete all books about him don't work -- see it
+test the hole project

@@ -355,6 +355,7 @@ public:
         linkedList.open(getIDsLinkedListFileName(), ios::out);
 
         secondary.seekp(0, ios::beg);
+        setFlagOff();
 
         secondary << indexState << '\n';
 

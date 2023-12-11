@@ -1,4 +1,1 @@
-OFF
-ahmed|0|7
-mahmoud|8|15
-mario|16|31
+ON
