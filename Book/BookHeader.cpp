@@ -213,11 +213,6 @@ public:
                 }
             }
             int length = stoi(len);
-            if (stringOffsetOfCurrent.length() > stringOffsetOfNext.length()){
-                length -= (stringOffsetOfCurrent.length() - stringOffsetOfNext.length());
-            }else{
-                length += (stringOffsetOfNext.length() - stringOffsetOfCurrent.length());
-            }
             string record = "*" + stringOffsetOfNext + "|" + to_string(length) + "|";
             f.seekp(offsetOfPrevious, ios::beg);
             f << record;

@@ -1,2 +1,2 @@
-00000040|00000002|2023-12-11 17:24:37|
-*65|25||20210313|address|*-1|26||d|2121454|address1|18asdasd|6464|asdas|*|5||16asdas|5454|fddd|*|6|4|
+-0000001|00000006|2023-12-11 19:22:48|
+18asas|6454654|ssss|*|5||16sadasd|454|aaaa|*|9|ess1|22asdasds|545454|asdasd|*|1|ssa|20214|sss|*|7|s4|28aasdasd|541654654|asdasdasd|20aasdasd|5455|ssdasd|

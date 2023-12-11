@@ -27,7 +27,6 @@ private:
     }
 
     void readFileDataPutInMemory(fstream &dataFile){
-        cout << "read file data in memory" << endl;
         // check if the data file is first once open
         AuthorDataFile::checkFileIsFirstOpen(dataFile);
         int offset = AuthorHeader::HeaderLength(dataFile);
@@ -38,9 +37,7 @@ private:
                 dataFile.close();
                 return;
             }
-
             auto it = Names.find(author->getName());
-
             // check if the name is entered before
             if (it != Names.end()) {
                 // the name is found
@@ -273,10 +270,7 @@ public:
 
     bool addAuthor(Author a){
         try{
-            cout << "before load" << endl;
             loadIndex();
-            cout << "before load" << endl;
-
             setFlagON();
             auto it = Names.find(lowerCase(a.getName()));
             if (it != Names.end()){
