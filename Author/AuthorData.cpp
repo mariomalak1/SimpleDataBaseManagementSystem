@@ -11,15 +11,7 @@ private:
     AuthorPrimaryIndex * authorPrimaryIndex;
     AuthorSecondaryIndexName * authorSecondaryIndexName;
     AuthorDataFile authorData;
-public:
-    AuthorData(){
-        authorPrimaryIndex = new AuthorPrimaryIndex();
-        authorSecondaryIndexName = new AuthorSecondaryIndexName();
-    }
-
-    bool addAuthor(){
-        // get the data from the user
-        Author author = Author::getValidAuthorDataFromUser();
+    bool addAuthorDirectly(Author author){
         int authorOffset;
 
         // check that no id entered before as this id from index
@@ -43,6 +35,18 @@ public:
             authorPrimaryIndex->setFlagOff();
             return false;
         }
+    }
+public:
+
+    AuthorData(){
+        authorPrimaryIndex = new AuthorPrimaryIndex();
+        authorSecondaryIndexName = new AuthorSecondaryIndexName();
+    }
+
+    bool addAuthor(){
+        // get the data from the user
+        Author author = Author::getValidAuthorDataFromUser();
+        return addAuthorDirectly(author);
     }
 
     Author * searchWithID(string ID, int &offset){
@@ -86,6 +90,31 @@ public:
 
     vector<Author> searchWithName(string name){
         return authorSecondaryIndexName->search(name);
+    }
+
+    void updateAuthorName(){
+        cin.ignore();
+        string ID;
+        cout << "Enter Author ID : ";
+        getline(cin, ID);
+
+        int offset;
+        Author * author = searchWithID(ID, offset);
+        if (author != nullptr){
+            // delete author first
+            deleteAuthor(author->getID());
+
+            cout << "Enter New Name Fot Author : ";
+            string name;
+            getline(cin, name);
+            author->setName(const_cast<char *>(name.c_str()));
+
+            // add the author after edit the name
+            addAuthorDirectly(*author);
+        }
+        else{
+            cout << "Author Not Found For Update." << endl;
+        }
     }
 };
 
