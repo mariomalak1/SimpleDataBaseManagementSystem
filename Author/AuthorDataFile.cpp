@@ -242,12 +242,12 @@ private:
             // if the old >= new record length +  length indicator + length of (*|<0-9>)
             else if (oldLength > newAddedLength + (2) + (3)){
                 // part len = old len - new len - (length indicator of new record)
-                int partLength = oldLength - newAddedLength - 2;
+                int partLength = oldLength - (newAddedLength + 2);
 
                 if (partLength > Author::NORMAL_LENGTH){
                     putInAvailList = true;
                     removeFromAvailList(file, offset);
-                    return deleteAuthorFromFile(file, (offset + newAddedLength + 2), partLength);
+                    return deleteAuthorFromFile(file, (offset + newAddedLength + 2), partLength - 2);
                 }
                 else{
                     putInAvailList = false;
@@ -293,7 +293,7 @@ public:
             return nullptr;
         }
         Author * author = new Author();
-//        try{
+        try{
             // read (length indicator) first
             bool isDeleted;
             int recordLength = AuthorDataFile::readLengthIndicator(f, offset, isDeleted);
@@ -314,11 +314,11 @@ public:
             // split the record and put in author object
             AuthorDataFile::splitRecordIntoAuthor(*author, record);
             return author;
-//        }
-//        catch(...){
-//            cout << "catch error from read author function in data file" << endl;
-//            return nullptr;
-//        }
+        }
+        catch(...){
+            cout << "catch error from read author function in data file" << endl;
+            return nullptr;
+        }
     }
 
     static bool addAuthor(Author &author, int &authorOffset);

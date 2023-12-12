@@ -240,12 +240,11 @@ private:
                 // if the old >= new record length +  length indicator + length of (*|<0-9>)
             else if (oldLength > newAddedLength + (2) + (3)){
                 // part len = old len - new len - (length indicator of new record)
-                int partLength = oldLength - newAddedLength - 2;
-
+                int partLength = oldLength - (newAddedLength + 2);
                 if (partLength > Book::NORMAL_LENGTH){
                     putInAvailList = true;
                     removeFromAvailList(file, offset);
-                    return deleteBookFromFile(file, (offset + newAddedLength + 2), partLength);
+                    return deleteBookFromFile(file, (offset + newAddedLength + 2), partLength - 2);
                 }
                 else{
                     putInAvailList = false;
@@ -291,7 +290,7 @@ public:
             return nullptr;
         }
         Book * book = new Book();
-//        try{
+        try{
         // read (length indicator) first
         bool isDeleted;
         int recordLength = BookDataFile::readLengthIndicator(f, offset, isDeleted);
@@ -312,11 +311,11 @@ public:
         // split the record and put in Book object
         BookDataFile::splitRecordIntoBook(*book, record);
         return book;
-//        }
-//        catch(...){
-//            cout << "catch error from read Book function in data file" << endl;
-//            return nullptr;
-//        }
+        }
+        catch(...){
+            cout << "catch error from read Book function in data file" << endl;
+            return nullptr;
+        }
     }
 
     static bool addBook(Book &book, int &bookOffset);

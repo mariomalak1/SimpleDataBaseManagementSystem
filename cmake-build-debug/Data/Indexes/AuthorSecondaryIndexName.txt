@@ -1,5 +1,4 @@
 OFF
 ehab|0|5
-mahou|6|13
-malak|14|20
-mario|21|42
+malak|6|12
+mario|13|25
