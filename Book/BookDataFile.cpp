@@ -389,15 +389,12 @@ bool BookDataFile::addBook(Book &book, int &bookOffset) {
             if (deletePart(file, suitableOffsetIfFound, book.getLengthOfRecord(), oldLength, putInAvailList, addedSpaces)){
                 if (!putInAvailList){
                     if (addedSpaces){
-                        char title [book.getBookTitle().length() + addedSpaces + 1];
-                        strncpy(title, book.getBookTitle().c_str(), book.getBookTitle().length());
-                        title[book.getBookTitle().length() + addedSpaces + 1] = '\0';
-                        int i = 0;
+                        string title = book.getBookTitle();
                         while (addedSpaces > 0){
-                            title[book.getBookTitle().length() + i] = ' ';
+                            title += " ";
                             addedSpaces--;
                         }
-                        book.setBookTitle(title);
+                        book.setBookTitle(const_cast<char *>(title.c_str()));
                     }
                     // change the pointer that point to this node to the next node
                     removeFromAvailList(file, suitableOffsetIfFound);

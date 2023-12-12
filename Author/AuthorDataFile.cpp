@@ -390,15 +390,12 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
             if (deletePart(file, suitableOffsetIfFound, author.getLengthOfRecord(), oldLength, putInAvailList, addedSpaces)){
                 if (!putInAvailList){
                     if (addedSpaces){
-                        char address [author.getAddress().length() + addedSpaces + 1];
-                        strncpy(address, author.getAddress().c_str(), author.getAddress().length());
-                        address[author.getAddress().length() + addedSpaces + 1] = '\0';
-                        int i = 0;
+                        string address = author.getAddress();
                         while (addedSpaces > 0){
-                            address[author.getAddress().length() + i] = ' ';
+                            address += " ";
                             addedSpaces--;
                         }
-                        author.setAddress(address);
+                        author.setAddress(const_cast<char *>(address.c_str()));
                     }
                     // change the pointer that point to this node to the next node
                     removeFromAvailList(file, suitableOffsetIfFound);
