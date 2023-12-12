@@ -18,7 +18,6 @@ private:
         cout << "7- Print Author (Author ID)" << endl;
         cout << "8- Print Book (ISBN)" << endl;
         cout << "9- Write Query" << endl;
-        cout << "f- Write Query" << endl;
         cout << "0- Exit" << endl;
     }
 
