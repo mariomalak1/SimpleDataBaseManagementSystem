@@ -56,21 +56,21 @@ private:
                                     cout << *authorData.AuthorData::searchWithID(ID, offset ) << endl;
                                 }
                                 else{
-                                    cout << "Enter valid query";
+                                    cout <<"Enter Valid Query" << endl;
                                 }
                             }
                             else{
-                                cout << "Enter valid query";
+                                cout <<"Enter Valid Query" << endl;
                             }
                         }
                         else{
-                            cout <<"Enter valid query";
+                            cout <<"Enter Valid Query" << endl;
                         }
                     }
                     else if(words[3] == "book"){
                         if(words[4] == "where"){
                             if (words[5] == "author"){
-                                if (words[6] == "author"){
+                                if (words[6] == "id"){
                                     if(words[7] == "="){
                                         vector<Book> books = bookData.AllBooksWrittenByAuthor(words[8]);
                                         if (books.size()){
@@ -82,26 +82,26 @@ private:
                                         }
                                     }
                                     else {
-                                        cout << "Enter valid query";
+                                        cout <<"Enter Valid Query" << endl;
                                     }
                                 }else{
-                                    cout << "Enter valid query";
+                                    cout <<"Enter Valid Query" << endl;
                                 }
                             }
                             else{
-                                cout << "Enter valid query";
+                                cout <<"Enter Valid Query" << endl;
                             }
                         }
                         else{
-                            cout <<"Enter valid query";
+                            cout <<"Enter Valid Query" << endl;
                         }
                     }
                     else {
-                        cout << "Enter valid query";
+                        cout <<"Enter Valid Query" << endl;
                     }
                 }
                 else{
-                    cout <<"Enter valid query";
+                    cout <<"Enter Valid Query" << endl;
                 }
             }
             else if (words[1] == "author"){
@@ -118,31 +118,31 @@ private:
                                     }
                                 }
                                 else {
-                                    cout << "Enter valid query";
+                                    cout <<"Enter Valid Query" << endl;
                                 }
                             }
                             else {
-                                cout << "Enter valid query";
+                                cout <<"Enter Valid Query" << endl;
                             }
                         }
                         else{
-                            cout <<"Enter valid query";
+                            cout <<"Enter Valid Query" << endl;
                         }
                     }
                     else{
-                        cout <<"Enter valid query";
+                        cout <<"Enter Valid Query" << endl;
                     }
                 }
                 else{
-                    cout <<"Enter valid query";
+                    cout <<"Enter Valid Query" << endl;
                 }
             }
             else{
-                cout << "Enter valid query";
+                cout <<"Enter Valid Query" << endl;
             }
         }
         else {
-            cout <<"Enter Valid Query";
+            cout <<"Enter Valid Query" << endl;
         }
 
     }
