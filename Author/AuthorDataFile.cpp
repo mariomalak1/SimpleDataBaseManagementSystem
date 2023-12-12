@@ -246,7 +246,8 @@ private:
 
                 if (partLength > Author::NORMAL_LENGTH){
                     putInAvailList = true;
-                    return deleteAuthorFromFile(file, offset, partLength);
+                    removeFromAvailList(file, offset);
+                    return deleteAuthorFromFile(file, (offset + newAddedLength + 2), partLength);
                 }
                 else{
                     putInAvailList = false;
@@ -322,8 +323,6 @@ public:
 
     static bool addAuthor(Author &author, int &authorOffset);
 
-    static Author * linear_search_ID(string id, int & AuthorOffset);
-
     // to delete the author and put it in avail list if it's size is big enough
     static bool deleteAuthorFromFile(fstream &file, int offset, int partLength){
         if(file.is_open()){
@@ -394,7 +393,7 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
                         char address [author.getAddress().length() + addedSpaces + 1];
                         strncpy(address, author.getAddress().c_str(), author.getAddress().length());
                         address[author.getAddress().length() + addedSpaces + 1] = '\0';
-                        int i = 1;
+                        int i = 0;
                         while (addedSpaces > 0){
                             address[author.getAddress().length() + i] = ' ';
                             addedSpaces--;
@@ -423,47 +422,4 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
     return true;
 }
 
-Author * AuthorDataFile::linear_search_ID(string id, int & AuthorOffset) {
-    fstream f;
-    f.open(AuthorDataFile::getFileName(), ios::in);
-
-    int offset = AuthorHeader::HeaderLength(f);
-
-    while (true){
-        try{
-            int lengthDeletedRecords = 0;
-            Author * author = readAuthor(f, offset, lengthDeletedRecords);
-            if(author == nullptr){
-                return nullptr;
-            }
-            f.seekg(offset, ios::beg);
-            try{
-                if (author->getID() == id){
-                    AuthorOffset = offset;
-                    return author;
-                }
-
-                else {
-                    int recordLength = author->getLengthOfRecord();
-                    offset += recordLength + to_string(recordLength).length();
-                    f.seekg(0, ios::end);
-
-                    if (f.tellg() == offset){
-                        AuthorOffset = -1;
-                        return nullptr;
-                    }
-                }
-            }
-            catch(...){
-                AuthorOffset = -1;
-                return nullptr;
-            }
-
-        }
-        catch(...){
-            AuthorOffset = -1;
-            return nullptr;
-        }
-    }
-}
 #endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORFILEDATA_H

@@ -17,8 +17,6 @@ using namespace std;
 #include <cstring>
 
 
-
-
 class BookDataFile {
 private:
     static const string FileName;
@@ -246,7 +244,8 @@ private:
 
                 if (partLength > Book::NORMAL_LENGTH){
                     putInAvailList = true;
-                    return deleteBookFromFile(file, offset, partLength);
+                    removeFromAvailList(file, offset);
+                    return deleteBookFromFile(file, (offset + newAddedLength + 2), partLength);
                 }
                 else{
                     putInAvailList = false;
@@ -322,7 +321,6 @@ public:
 
     static bool addBook(Book &book, int &bookOffset);
 
-    static Book * linear_search_ISBN(string id, int & BookOffset);
 
     // to delete the Book and put it in avail list if it's size is big enough
     static bool deleteBookFromFile(fstream &file, int offset, int partLength){
@@ -374,6 +372,7 @@ bool BookDataFile::addBook(Book &book, int &bookOffset) {
 
     BookHeader::readHeaderRecord(file);
 
+    // record len + len of length indicator
     int recordLength = book.getLengthOfRecord() + 2;
     int suitableOffsetIfFound = availList(recordLength, file);
     if (suitableOffsetIfFound != -1){
@@ -393,7 +392,7 @@ bool BookDataFile::addBook(Book &book, int &bookOffset) {
                         char title [book.getBookTitle().length() + addedSpaces + 1];
                         strncpy(title, book.getBookTitle().c_str(), book.getBookTitle().length());
                         title[book.getBookTitle().length() + addedSpaces + 1] = '\0';
-                        int i = 1;
+                        int i = 0;
                         while (addedSpaces > 0){
                             title[book.getBookTitle().length() + i] = ' ';
                             addedSpaces--;
@@ -407,7 +406,6 @@ bool BookDataFile::addBook(Book &book, int &bookOffset) {
                 return false;
             }
         }
-
         file.seekp(suitableOffsetIfFound, ios::beg);
     }
     else {
@@ -421,50 +419,6 @@ bool BookDataFile::addBook(Book &book, int &bookOffset) {
     BookHeader::updateHeaderRecord(file, 1);
     file.close();
     return true;
-}
-
-Book * BookDataFile::linear_search_ISBN(string id, int & BookOffset) {
-    fstream f;
-    f.open(BookDataFile::getFileName(), ios::in);
-
-    int offset = BookHeader::HeaderLength(f);
-
-    while (true){
-        try{
-            int lengthDeletedRecords = 0;
-            Book * book = readBook(f, offset, lengthDeletedRecords);
-            if(book == nullptr){
-                return nullptr;
-            }
-            f.seekg(offset, ios::beg);
-            try{
-                if (book->getID() == id){
-                    BookOffset = offset;
-                    return book;
-                }
-
-                else {
-                    int recordLength = book->getLengthOfRecord();
-                    offset += recordLength + to_string(recordLength).length();
-                    f.seekg(0, ios::end);
-
-                    if (f.tellg() == offset){
-                        BookOffset = -1;
-                        return nullptr;
-                    }
-                }
-            }
-            catch(...){
-                BookOffset = -1;
-                return nullptr;
-            }
-
-        }
-        catch(...){
-            BookOffset = -1;
-            return nullptr;
-        }
-    }
 }
 
 #endif //SIMPLEDATABASEMANAGMENTSYSTEM__BOOKFILEDATA_
