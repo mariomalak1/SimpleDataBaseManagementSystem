@@ -504,13 +504,14 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
 
     AuthorHeader::readHeaderRecord(file);
 
+    // record len + len of length indicator
     int recordLength = author.getLengthOfRecord() + 2;
     int suitableOffsetIfFound = availList(recordLength, file);
     if (suitableOffsetIfFound != -1){
         int oldLength = readLengthOfNodeInAvailList(file, suitableOffsetIfFound);
                                           // 2
         // check that the len of author + len indicator = old size
-        if (oldLength == author.getLengthOfRecord() + 2){
+        if (oldLength == recordLength){
             removeFromAvailList(file, suitableOffsetIfFound);
         }
         else{
@@ -522,7 +523,7 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
                     if (addedSpaces){
                         char address [author.getAddress().length() + addedSpaces + 1];
                         strncpy(address, author.getAddress().c_str(), author.getAddress().length());
-                        address[author.getAddress().length() + addedSpaces] = '\0';
+                        address[author.getAddress().length() + addedSpaces + 1] = '\0';
                         int i = 1;
                         while (addedSpaces > 0){
                             address[author.getAddress().length() + i] = ' ';

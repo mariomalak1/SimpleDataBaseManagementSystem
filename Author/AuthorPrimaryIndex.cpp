@@ -210,9 +210,6 @@ public:
             fstream f;
             f.open(AuthorDataFile::getFileName(), ios::in);
 
-            cout << "vec first : " << vec[index].begin()->first << endl;
-            cout << "vec second : " << vec[index].begin()->second << endl;
-
             offset = vec[index].begin()->second;
             int lengthDeletedRecords = 0;
             author = AuthorDataFile::readAuthor(f,offset, lengthDeletedRecords);

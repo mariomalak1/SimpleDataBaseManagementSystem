@@ -374,13 +374,13 @@ bool BookDataFile::addBook(Book &book, int &bookOffset) {
 
     BookHeader::readHeaderRecord(file);
 
-    int recordLength = book.getLengthOfRecord();
+    int recordLength = book.getLengthOfRecord() + 2;
     int suitableOffsetIfFound = availList(recordLength, file);
     if (suitableOffsetIfFound != -1){
         int oldLength = readLengthOfNodeInAvailList(file, suitableOffsetIfFound);
         // 2
         // check that the len of Book + len indicator = old size
-        if (oldLength == book.getLengthOfRecord() + 2){
+        if (oldLength == recordLength){
             removeFromAvailList(file, suitableOffsetIfFound);
         }
         else{

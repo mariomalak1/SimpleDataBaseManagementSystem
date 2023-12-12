@@ -1,3 +1,6 @@
 OFF
-mARIo|0|5
-mario|6|10
+kmkn|0|5
+malak|6|19
+mario|20|33
+mmkmk|34|41
+sadss|42|49
