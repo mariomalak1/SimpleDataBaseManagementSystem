@@ -3,21 +3,21 @@
 
 #include "AuthorDataFile.cpp"
 #include "AuthorPrimaryIndex.cpp"
+#include "AuthorSecondaryIndexName.cpp"
+#include "../Book/BookData.cpp"
 
 class AuthorData{
 private:
     AuthorPrimaryIndex * authorPrimaryIndex;
+    AuthorSecondaryIndexName * authorSecondaryIndexName;
     AuthorDataFile authorData;
 public:
-
     AuthorData(){
         authorPrimaryIndex = new AuthorPrimaryIndex();
+        authorSecondaryIndexName = new AuthorSecondaryIndexName();
     }
 
     bool addAuthor(){
-        authorPrimaryIndex->loadIndex();
-        authorPrimaryIndex->setFlagOn();
-
         // get the data from the user
         Author author = Author::getValidAuthorDataFromUser();
         int authorOffset;
@@ -33,9 +33,13 @@ public:
             // then go to write it in the index file
             authorPrimaryIndex->setFlagOff();
             authorPrimaryIndex->addAuthor(author, authorOffset);
+
+            authorSecondaryIndexName->setFlagOff();
+            authorSecondaryIndexName->addAuthor(author);
             return true;
         }
         else {
+            authorSecondaryIndexName->setFlagOff();
             authorPrimaryIndex->setFlagOff();
             return false;
         }
@@ -54,32 +58,34 @@ public:
         }
 
         // delete all books with this author id -> with all indexes for books
+        BookData bookData = BookData();
+        vector<Book> booksWrittenByAuthor = bookData.AllBooksWrittenByAuthor(author->getID());
 
-
+        for (Book b: booksWrittenByAuthor) {
+            bookData.deleteBook(b.getID());
+        }
 
         // delete from the data file
         fstream dataFile;
         dataFile.open(AuthorDataFile::getFileName(), ios::in|ios::out);
 
-        bool deleted = AuthorDataFile::deletePart(dataFile, offset, author->getLengthOfRecord());
+        bool deleted = AuthorDataFile::deleteAuthorFromFile(dataFile, offset, author->getLengthOfRecord());
 
         if (deleted){
-            authorPrimaryIndex->deleteAuthor(ID);
             // delete the author from all index files -->
+            authorPrimaryIndex->deleteAuthor(ID);
+            authorSecondaryIndexName->deleteAuthor(*author);
+
             AuthorDataFile::updateNumOfRecordsInHeader(dataFile, -1);
             return true;
         }
         else {
             return false;
         }
+    }
 
-        // delete all books with this author id -> with all indexes for books
-
-        // delete the author from file
-
-        // delete the author from all index files
-
-        return true;
+    vector<Author> searchWithName(string name){
+        return authorSecondaryIndexName->search(name);
     }
 };
 

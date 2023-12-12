@@ -1,10 +1,12 @@
 #include <iostream>
 #include "Author/AuthorData.cpp"
+#include "queryProcessing.cpp"
 using namespace std;
 
 class Application{
 private:
     AuthorData * authorData;
+    BookData * bookData;
 
     void printMenu(){
         cout << "1- Add New Author" << endl;
@@ -16,6 +18,7 @@ private:
         cout << "7- Print Author (Author ID)" << endl;
         cout << "8- Print Book (ISBN)" << endl;
         cout << "9- Write Query" << endl;
+        cout << "f- Write Query" << endl;
         cout << "0- Exit" << endl;
     }
 
@@ -39,7 +42,11 @@ private:
             }
         }
         else if (response == "2"){
-            // add new book
+            if (bookData->addBook()){
+                cout << "Record added successfully" << endl;
+            }else{
+                cout << "Can't add the record" << endl;
+            }
         }
         else if (response == "3"){
             // update author name with id
@@ -49,6 +56,15 @@ private:
         }
         else if (response == "5"){
             // delete book with id
+            cin.ignore();
+            string ID;
+            cout << "Enter Book ISBN : ";
+            getline(cin, ID);
+            if (bookData->deleteBook(ID)){
+                cout << "Delete Book Done" << endl;
+            }else{
+                cout << "Can't Delete Book" << endl;
+            }
         }
         else if (response == "6"){
             // delete author with id
@@ -76,10 +92,20 @@ private:
             }
         }
         else if (response == "8"){
-            // print book with id
+            string id;
+            cout << "Enter Book ISBN : ";
+            cin >> id;
+            int offset;
+            Book *book = bookData->searchWithISBN(id, offset);
+            if (book != nullptr){
+                cout << *book << endl;
+            }else{
+                cout << "No Book With ISBN : " << id << endl;
+            }
+
         }
         else if (response == "9"){
-            // write query
+            queryProcessing::query();
         }
         else if (response == "0") {
             cout << "Turn Off" << endl;
@@ -97,5 +123,6 @@ public:
 
     Application(){
         authorData = new AuthorData();
+        bookData = new BookData();
     }
 };

@@ -1,0 +1,4 @@
+OFF
+ehab|0|5
+malak|6|12
+mario|13|25

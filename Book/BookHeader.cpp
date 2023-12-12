@@ -1,5 +1,5 @@
-#ifndef SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORHEADER_H
-#define SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORHEADER_H
+#ifndef SIMPLEDATABASEMANAGMENTSYSTEM__BOOKHEADER_H
+#define SIMPLEDATABASEMANAGMENTSYSTEM__BOOKHEADER_H
 
 // imports for ios
 #include <iostream>
@@ -16,7 +16,7 @@
 
 using namespace std;
 
-class AuthorHeader{
+class BookHeader{
 private:
     static const int DATE_TIME_SIZE = 20;
     static const int NUM_RECORD_SIZE = 9;
@@ -33,7 +33,7 @@ private:
 
     static void copyStringToArray(const string& inputString, char* outputArray, int arraySize) {
         strncpy(outputArray, inputString.c_str(), arraySize - 1);
-        outputArray[arraySize - 1] = '\0';
+        outputArray[arraySize - 1] = '\0'; // Ensure null-termination
     }
 
     // function to format the string to put zero's
@@ -143,8 +143,8 @@ private:
 public:
     // return vector of vectors were the vector hold offset number, and it's size
     static vector<map<int, int>> AvailList(fstream &f){
-        AuthorHeader::readHeaderRecord(f);
-        int availListPointer = (AuthorHeader::getFirstNodeAvailList());
+        readHeaderRecord(f);
+        int availListPointer = (getFirstNodeAvailList());
 
         vector<map<int, int>> vectorOfNodes;
 //        try {
@@ -198,6 +198,7 @@ public:
         string stringOffsetOfCurrent = to_string(offsetOfCurrent);
         string stringOffsetOfNext = to_string(offsetOfNext);
 
+
         if (stringOffsetOfCurrent.length() != stringOffsetOfNext.length()){
             // get len of current -> to make new rec with the new pointer
             f.seekg(stringOffsetOfCurrent.length() + 1, ios::cur);
@@ -239,7 +240,7 @@ public:
 
     static int HeaderLength(fstream &f){
         // update header data
-        AuthorHeader::readHeaderRecord(f);
+        BookHeader::readHeaderRecord(f);
         // length of header + delimiters + '\n'
         int len = strlen(availList) + strlen(numRecords) + strlen(lastUpdated) + 5;
         return len;
@@ -308,7 +309,6 @@ public:
                         break;
                     }
                 }
-
                 string recordAfterModification = "*" + stringLastNodeOffset + "|" + beforeLastNodeLength + "|";
 
                 if (stoi(beforeLastNodeLength) <= recordAfterModification.length()){
@@ -322,8 +322,8 @@ public:
         }
     }
 };
-char AuthorHeader::lastUpdated[AuthorHeader::DATE_TIME_SIZE];
-char AuthorHeader::availList[AuthorHeader::AVAIL_LIST_SIZE];
-char AuthorHeader::numRecords[AuthorHeader::NUM_RECORD_SIZE];
+char BookHeader::lastUpdated[BookHeader::DATE_TIME_SIZE];
+char BookHeader::availList[BookHeader::AVAIL_LIST_SIZE];
+char BookHeader::numRecords[BookHeader::NUM_RECORD_SIZE];
 
-#endif // SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORHEADER_H
+#endif // SIMPLEDATABASEMANAGMENTSYSTEM__BOOKHEADER_H

@@ -1,2 +1,9 @@
-need to delete the remaining part of delete record after replace part of it
-when delete it not delete records like 43, and many records doesn't
+- make what change in change pointer in author in book also -- done
+- make what edited in author data file and edit it in book data file -- done
+
+- delete book -- done
+- not added in avail list in book  --- check the avail list at all in book -- done
+- delete all books from one author in the hole program
+- delete author that have book
+- delete author that have many books
+- test the hole project

@@ -4,15 +4,18 @@
 #include <vector>
 #include <algorithm>
 #include "Author/AuthorData.cpp"
+#include "Book/BookData.cpp"
 
 using namespace std;
 class queryProcessing{
 private:
-    static AuthorData ad ;
+    static AuthorData authorData;
+    static BookData bookData;
     static int offset;
-    static string  takeQuery(){
-        cout <<"Enter the query: \n";
+    static string takeQuery(){
+        cout <<"Enter the query: ";
         string query ;
+        cin.ignore();
         getline (cin , query);
         return query;
 
@@ -50,7 +53,7 @@ private:
                         if(words[4] == "where"){
                             if (words[5] == "id"){
                                 if(words[6] == "="){
-                                    cout << ad.AuthorData::searchWithID(ID,offset );
+                                    cout << *authorData.AuthorData::searchWithID(ID, offset ) << endl;
                                 }
                                 else{
                                     cout << "Enter valid query";
@@ -66,11 +69,22 @@ private:
                     }
                     else if(words[3] == "book"){
                         if(words[4] == "where"){
-                            if (words[5] == "id"){
-                                if(words[6] == "="){
-
-                                }
-                                else{
+                            if (words[5] == "author"){
+                                if (words[6] == "author"){
+                                    if(words[7] == "="){
+                                        vector<Book> books = bookData.AllBooksWrittenByAuthor(words[8]);
+                                        if (books.size()){
+                                            for (int i = 0; i < books.size(); ++i) {
+                                                cout << books[i] << endl;
+                                            }
+                                        }else{
+                                            cout << "No Books Written By This Author." << endl;
+                                        }
+                                    }
+                                    else {
+                                        cout << "Enter valid query";
+                                    }
+                                }else{
                                     cout << "Enter valid query";
                                 }
                             }
@@ -97,8 +111,7 @@ private:
                             if(words[5] == "where"){
                                 if (words[6] == "id"){
                                     if (words[7] == "="){
-                                        cout << "Third query";
-                                        cout << endl << ID;
+                                        cout << authorData.AuthorData::searchWithID(ID, offset )->getName() << endl;
                                     }
                                     else {
                                         cout<<"Enter valid query";
@@ -138,12 +151,6 @@ public:
         processQuery();
     }
 };
-
-
-
-
-int main() {
-    queryProcessing::query();
-    return 0;
-}
-
+AuthorData queryProcessing::authorData = AuthorData();
+BookData queryProcessing::bookData = BookData();
+int queryProcessing::offset = 0;

@@ -1,15 +1,16 @@
-#ifndef SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORPRIMARYINDEX_H
-#define SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORPRIMARYINDEX_H
+#ifndef MAIN_CPP_BOOKPRIMARYINDEX_H
+#define MAIN_CPP_BOOKPRIMARYINDEX_H
+
 
 #include <vector>
 #include <map>
 #include <algorithm>
-#include "AuthorDataFile.cpp"
+#include "BookDataFile.cpp"
 
-class AuthorPrimaryIndex{
+class BookPrimaryIndex{
 private:
     string indexState;
-    const string FileName = "Data\\Indexes\\AuthorPrimaryIndex.txt";
+    const string FileName = "Data\\Indexes\\BookPrimaryIndex.txt";
     // to check on the index is upto date or not
     bool checkIndexUpToDate(){
         // is off -> upto date
@@ -24,31 +25,31 @@ private:
 
     void readFileDataPutInMemory(fstream &dataFile){
         // check if the data file is first once open
-        AuthorDataFile::checkFileIsFirstOpen(dataFile);
+        BookDataFile::checkFileIsFirstOpen(dataFile);
 
-        int offset = AuthorHeader::HeaderLength(dataFile);
+        int offset = BookHeader::HeaderLength(dataFile);
         map<string, int> map;
 
         while (true){
             int lengthDeletedRecords = 0;
-            Author * author = AuthorDataFile::readAuthor(dataFile, offset, lengthDeletedRecords);
-            if (author == nullptr){
+            Book * book = BookDataFile::readBook(dataFile, offset, lengthDeletedRecords);
+            if (book == nullptr){
                 dataFile.close();
                 return;
             }
 
-            map.insert(make_pair(author->getID(), offset));
+            map.insert(make_pair(book->getID(), offset));
             vec.push_back(map);
-            map.erase(author->getID());
+            map.erase(book->getID());
 
-            int recordLength = author->getLengthOfRecord();
+            int recordLength = book->getLengthOfRecord();
             offset += recordLength + to_string(recordLength).length() + lengthDeletedRecords;
         }
     }
 
     void makeNewIndexFile(){
         fstream dataFile;
-        dataFile.open(AuthorDataFile::getFileName(), ios::in);
+        dataFile.open(BookDataFile::getFileName(), ios::in);
         // put all data in data file
         readFileDataPutInMemory(dataFile);
 
@@ -199,21 +200,21 @@ public:
 
     }
 
-    Author * search(string id, int &offset){
-        Author * author;
-        if (!checkIndexUpToDate()){
+    Book * search(string isbn, int &offset){
+        loadIndex();
+        Book * book;
+        if (vec.empty() || !checkIndexUpToDate()){
             loadIndex();
         }
-        int index = binarySearchInVector(vec, id);
-
+        int index = binarySearchInVector(vec, isbn);
         if (index != -1){
             fstream f;
-            f.open(AuthorDataFile::getFileName(), ios::in);
+            f.open(BookDataFile::getFileName(), ios::in);
 
             offset = vec[index].begin()->second;
             int lengthDeletedRecords = 0;
-            author = AuthorDataFile::readAuthor(f,offset, lengthDeletedRecords);
-            return author;
+            book = BookDataFile::readBook(f,offset, lengthDeletedRecords);
+            return book;
         }
         offset = -1;
         return nullptr;
@@ -224,14 +225,14 @@ public:
     }
 
     // add id to index vector, then sort the vector, then write it
-    bool addAuthor(Author a, int offset){
+    bool addBook(Book b, int offset){
         try{
             loadIndex();
             setFlagOn();
             fstream f;
             f.open(getFileName(), ios::out);
             map<string, int> map;
-            map.insert(make_pair(a.getID(), offset));
+            map.insert(make_pair(b.getID(), offset));
             vec.push_back(map);
             sortIndex();
             setFlagOff();
@@ -240,13 +241,13 @@ public:
             return true;
         }
         catch (...){
-            cerr << "Error While Adding Author with id -> " << a.getID() << endl;
+            cerr << "Error While Adding Book with id -> " << b.getID() << endl;
             return false;
         }
     }
 
-    // delete the author from vector and write the index file again
-    bool deleteAuthor(string id){
+    // delete the book from vector and write the index file again
+    bool deleteBook(string id){
         loadIndex();
         setFlagOn();
         // Find the map with the specified key using std::find_if
@@ -269,7 +270,7 @@ public:
     // must put indexState with a value
     void writeIndexFile(){
         fstream f;
-        f.open(getFileName(), ios::out);
+        f.open(getFileName(), ios::out | ios::in);
         if (!f.is_open()){
             cerr << "Error While Write Index File." << endl;
             return;
@@ -285,5 +286,4 @@ public:
     }
 };
 
-
-#endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORPRIMARYINDEX_H
+#endif //MAIN_CPP_BOOKPRIMARYINDEX_H

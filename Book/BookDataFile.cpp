@@ -1,11 +1,9 @@
-#ifndef SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORFILEDATA_H
-#define SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORFILEDATA_H
+#ifndef SIMPLEDATABASEMANAGMENTSYSTEM__BOOKFILEDATA_H
+#define SIMPLEDATABASEMANAGMENTSYSTEM__BOOKFILEDATA_H
 
+#include "BookHeader.cpp"
+#include "Book.cpp"
 using namespace std;
-// files we create
-#include "../FileError.cpp"
-#include "AuthorHeader.cpp"
-#include "Author.cpp"
 
 // some needed algorithms
 #include <algorithm>
@@ -19,7 +17,7 @@ using namespace std;
 #include <cstring>
 
 
-class AuthorDataFile {
+class BookDataFile {
 private:
     static const string FileName;
 
@@ -50,7 +48,7 @@ private:
     }
 
     static int readPreviousPointer(fstream &f, int specificNodeOffset, bool &isListEmpty){
-        int firstNode = AuthorHeader::getFirstNodeAvailList();
+        int firstNode = BookHeader::getFirstNodeAvailList();
         int pre;
         if (firstNode == -1){
             isListEmpty = true;
@@ -80,18 +78,18 @@ private:
 
         int nextPointer = readNextPointer(f, specificNodeOffset);
 
-        if (specificNodeOffset == AuthorHeader::getFirstNodeAvailList()){
+        if (specificNodeOffset == BookHeader::getFirstNodeAvailList()){
             // change avail list pointer to the next pointer
-            AuthorHeader::setFirstNodeInAvailList(f, nextPointer);
+            BookHeader::setFirstNodeInAvailList(f, nextPointer);
         }
         else{
-            AuthorHeader::changePointer(f, previousPointer, nextPointer, specificNodeOffset);
+            BookHeader::changePointer(f, previousPointer, nextPointer, specificNodeOffset);
         }
     }
 
     // will return the offset of the suitable record
     static int availList(int recordLength, fstream&f){
-        vector<map<int, int>> availListVector = AuthorHeader::AvailList(f);
+        vector<map<int, int>> availListVector = BookHeader::AvailList(f);
         sortAvailList(availListVector);
         // return the suitable size that fit the new one
         for (int i = 0; i < availListVector.size(); ++i) {
@@ -102,7 +100,7 @@ private:
         return -1;
     }
 
-    static void splitRecordIntoAuthor(Author & author, string record){
+    static void splitRecordIntoBook(Book & book, string record){
         int i = 0;
 
         // if the record length is less than the default will throw error
@@ -111,33 +109,33 @@ private:
         }
 
         // fill name string
-        string name = "";
+        string title = "";
         while (i < record.length() && record[i] != '|'){
-            name += record[i];
+            title += record[i];
             i++;
         }
 
         i++;
 
         // fill id string
-        string id;
+        string isbn;
         while (i < record.length() && record[i] != '|'){
-            id += record[i];
+            isbn += record[i];
             i++;
         }
 
         i++;
 
         // fill address string
-        string address;
+        string authorID;
         while (i < record.length() && record[i] != '|'){
-            address += record[i];
+            authorID += record[i];
             i++;
         }
 
-        author.setName(const_cast<char *>(name.c_str()));
-        author.setID(const_cast<char *>(id.c_str()));
-        author.setAddress(const_cast<char *>(address.c_str()));
+        book.setBookTitle(const_cast<char *>(title.c_str()));
+        book.setID(const_cast<char *>(isbn.c_str()));
+        book.setAuthorID(const_cast<char *>(authorID.c_str()));
     }
 
     static int readLengthIndicator(fstream &f, int index, bool &isDeleted) {
@@ -173,7 +171,7 @@ private:
         return length;
     }
 
-    static string readAuthorRecord(fstream &f, int recordLength, int indexAfterIndicator) {
+    static string readBookRecord(fstream &f, int recordLength, int indexAfterIndicator) {
         f.seekg(indexAfterIndicator, ios::beg);
 
         char * record = new char[recordLength];
@@ -239,15 +237,14 @@ private:
                 putInAvailList = false;
                 return true;
             }
-            // if the old >= new record length +  length indicator + length of (*|<0-9>)
+                // if the old >= new record length +  length indicator + length of (*|<0-9>)
             else if (oldLength > newAddedLength + (2) + (3)){
                 // part len = old len - new len - (length indicator of new record)
                 int partLength = oldLength - (newAddedLength + 2);
-
-                if (partLength > Author::NORMAL_LENGTH){
+                if (partLength > Book::NORMAL_LENGTH){
                     putInAvailList = true;
                     removeFromAvailList(file, offset);
-                    return deleteAuthorFromFile(file, (offset + newAddedLength + 2), partLength - 2);
+                    return deleteBookFromFile(file, (offset + newAddedLength + 2), partLength - 2);
                 }
                 else{
                     putInAvailList = false;
@@ -279,52 +276,53 @@ public:
         int fileEnd = file.tellg();
 
         if (fileBegin == fileEnd){
-            AuthorHeader::updateHeaderRecord(file, 0, true);
+            BookHeader::updateHeaderRecord(file, 0, true);
         }
     }
 
     static string getFileName(){
-        return AuthorDataFile::FileName;
+        return BookDataFile::FileName;
     }
 
-    static Author * readAuthor(fstream &f, int offset, int & lengthDeletedRecords){
+    static Book * readBook(fstream &f, int offset, int & lengthDeletedRecords){
         // check if we in eof
         if (checkEOF(f, offset)){
             return nullptr;
         }
-        Author * author = new Author();
+        Book * book = new Book();
         try{
-            // read (length indicator) first
-            bool isDeleted;
-            int recordLength = AuthorDataFile::readLengthIndicator(f, offset, isDeleted);
-            if (isDeleted){
-                bool notAvailPointer;
-                int availPointer = readAvailNodePointer(f, notAvailPointer);
-                int lengthAfterDelete;
-                if (notAvailPointer){
-                    lengthAfterDelete = readLengthIndicator(f, offset + 2, isDeleted);
-                }else{
-                    lengthAfterDelete = readLengthIndicator(f, offset + 2 + to_string(availPointer).length(), isDeleted);
-                }
-                lengthDeletedRecords += lengthAfterDelete;
-                return readAuthor(f, offset + lengthAfterDelete, lengthDeletedRecords);
+        // read (length indicator) first
+        bool isDeleted;
+        int recordLength = BookDataFile::readLengthIndicator(f, offset, isDeleted);
+        if (isDeleted){
+            bool notAvailPointer;
+            int availPointer = readAvailNodePointer(f, notAvailPointer);
+            int lengthAfterDelete;
+            if (notAvailPointer){
+                lengthAfterDelete = readLengthIndicator(f, offset + 2, isDeleted);
+            }else{
+                lengthAfterDelete = readLengthIndicator(f, offset + 2 + to_string(availPointer).length(), isDeleted);
             }
-            // read the hole record
-            string record = AuthorDataFile::readAuthorRecord(f, recordLength, offset + to_string(recordLength).length());
-            // split the record and put in author object
-            AuthorDataFile::splitRecordIntoAuthor(*author, record);
-            return author;
+            lengthDeletedRecords += lengthAfterDelete;
+            return readBook(f, offset + lengthAfterDelete, lengthDeletedRecords);
+        }
+        // read the hole record
+        string record = BookDataFile::readBookRecord(f, recordLength, offset + to_string(recordLength).length());
+        // split the record and put in Book object
+        BookDataFile::splitRecordIntoBook(*book, record);
+        return book;
         }
         catch(...){
-            cout << "catch error from read author function in data file" << endl;
+            cout << "catch error from read Book function in data file" << endl;
             return nullptr;
         }
     }
 
-    static bool addAuthor(Author &author, int &authorOffset);
+    static bool addBook(Book &book, int &bookOffset);
 
-    // to delete the author and put it in avail list if it's size is big enough
-    static bool deleteAuthorFromFile(fstream &file, int offset, int partLength){
+
+    // to delete the Book and put it in avail list if it's size is big enough
+    static bool deleteBookFromFile(fstream &file, int offset, int partLength){
         if(file.is_open()){
             // check if can
             string stringPartLength = to_string(partLength);
@@ -336,7 +334,7 @@ public:
             }
 
             // check if can delete this part, or it is small one
-            bool cond = AuthorHeader::changePointerLastNodeAvailList(file, offset);
+            bool cond = BookHeader::changePointerLastNodeAvailList(file, offset);
 
             file.seekp(offset, ios::beg);
             // put delete mark
@@ -348,7 +346,7 @@ public:
             }
             return true;
         }else{
-            cerr << "Error While Deleting Author." << endl;
+            cerr << "Error While Deleting Book." << endl;
             return false;
         }
     }
@@ -356,30 +354,30 @@ public:
     // can be added with negative or positive value
     static void updateNumOfRecordsInHeader(fstream &file, int addNumRecords){
         if(addNumRecords){
-            AuthorHeader::updateHeaderRecord(file, addNumRecords);
+            BookHeader::updateHeaderRecord(file, addNumRecords);
         }
     }
 };
 
-const string AuthorDataFile::FileName = "Data\\Author.txt";
+const string BookDataFile::FileName = "Data\\Book.txt";
 
-bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
+bool BookDataFile::addBook(Book &book, int &bookOffset) {
     // check that is first row will add in the file
     fstream file;
-    file.open(AuthorDataFile::getFileName(), ios::out|ios::in);
+    file.open(BookDataFile::getFileName(), ios::out|ios::in);
 
     // will add the header if it's the first time to open the file
     checkFileIsFirstOpen(file);
 
-    AuthorHeader::readHeaderRecord(file);
+    BookHeader::readHeaderRecord(file);
 
     // record len + len of length indicator
-    int recordLength = author.getLengthOfRecord() + 2;
+    int recordLength = book.getLengthOfRecord() + 2;
     int suitableOffsetIfFound = availList(recordLength, file);
     if (suitableOffsetIfFound != -1){
         int oldLength = readLengthOfNodeInAvailList(file, suitableOffsetIfFound);
-                                          // 2
-        // check that the len of author + len indicator = old size
+        // 2
+        // check that the len of Book + len indicator = old size
         if (oldLength == recordLength){
             removeFromAvailList(file, suitableOffsetIfFound);
         }
@@ -387,15 +385,15 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
             bool putInAvailList;
             int addedSpaces = 0;
             // mark the remaining part as deleted
-            if (deletePart(file, suitableOffsetIfFound, author.getLengthOfRecord(), oldLength, putInAvailList, addedSpaces)){
+            if (deletePart(file, suitableOffsetIfFound, book.getLengthOfRecord(), oldLength, putInAvailList, addedSpaces)){
                 if (!putInAvailList){
                     if (addedSpaces){
-                        string address = author.getAddress();
+                        string title = book.getBookTitle();
                         while (addedSpaces > 0){
-                            address += " ";
+                            title += " ";
                             addedSpaces--;
                         }
-                        author.setAddress(const_cast<char *>(address.c_str()));
+                        book.setBookTitle(const_cast<char *>(title.c_str()));
                     }
                     // change the pointer that point to this node to the next node
                     removeFromAvailList(file, suitableOffsetIfFound);
@@ -404,19 +402,19 @@ bool AuthorDataFile::addAuthor(Author &author, int &authorOffset) {
                 return false;
             }
         }
-
-    file.seekp(suitableOffsetIfFound, ios::beg);
+        file.seekp(suitableOffsetIfFound, ios::beg);
     }
     else {
         file.seekp(0, ios::end);
     }
-    authorOffset = file.tellp();
-    file << author;
+
+    bookOffset = file.tellp();
+    file << book;
 
     // update header
-    AuthorHeader::updateHeaderRecord(file, 1);
+    BookHeader::updateHeaderRecord(file, 1);
     file.close();
     return true;
 }
 
-#endif //SIMPLEDATABASEMANAGMENTSYSTEM__AUTHORFILEDATA_H
+#endif //SIMPLEDATABASEMANAGMENTSYSTEM__BOOKFILEDATA_
