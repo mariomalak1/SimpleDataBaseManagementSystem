@@ -309,7 +309,6 @@ public:
                         break;
                     }
                 }
-
                 string recordAfterModification = "*" + stringLastNodeOffset + "|" + beforeLastNodeLength + "|";
 
                 if (stoi(beforeLastNodeLength) <= recordAfterModification.length()){

@@ -36,15 +36,12 @@ public:
             return false;
         }
 
-        cout << *author << endl;
-
         if(bookData.addBook(book, bookOffset)){
             // add in index file -> automatically sort the file again in the memory
             // then go to write it in the index file
             bookPrimaryIndex->setFlagOff();
             bookPrimaryIndex->addBook(book, bookOffset);
 
-            cout << "after search in primary" << endl;
 
             bookSecondaryIndexAuthorIDs->setFlagOff();
             bookSecondaryIndexAuthorIDs->addBook(book);
@@ -80,7 +77,7 @@ public:
             bookPrimaryIndex->deleteBook(isbn);
             bookSecondaryIndexAuthorIDs->deleteBook(*book);
 
-            AuthorDataFile::updateNumOfRecordsInHeader(dataFile, -1);
+            BookDataFile::updateNumOfRecordsInHeader(dataFile, -1);
             return true;
         }
         else {

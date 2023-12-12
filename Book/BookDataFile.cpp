@@ -392,7 +392,7 @@ bool BookDataFile::addBook(Book &book, int &bookOffset) {
                     if (addedSpaces){
                         char title [book.getBookTitle().length() + addedSpaces + 1];
                         strncpy(title, book.getBookTitle().c_str(), book.getBookTitle().length());
-                        title[book.getBookTitle().length() + addedSpaces] = '\0';
+                        title[book.getBookTitle().length() + addedSpaces + 1] = '\0';
                         int i = 1;
                         while (addedSpaces > 0){
                             title[book.getBookTitle().length() + i] = ' ';
@@ -466,7 +466,5 @@ Book * BookDataFile::linear_search_ISBN(string id, int & BookOffset) {
         }
     }
 }
-
-
 
 #endif //SIMPLEDATABASEMANAGMENTSYSTEM__BOOKFILEDATA_
