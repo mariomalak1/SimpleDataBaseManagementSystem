@@ -104,13 +104,14 @@ public:
             // delete author first
             deleteAuthor(author->getID());
 
-            cout << "Enter New Name Fot Author : ";
+            cout << "Enter New Name For Author : ";
             string name;
             getline(cin, name);
             author->setName(const_cast<char *>(name.c_str()));
 
             // add the author after edit the name
             addAuthorDirectly(*author);
+            cout << "Author Updated Successfully" << endl;
         }
         else{
             cout << "Author Not Found For Update." << endl;

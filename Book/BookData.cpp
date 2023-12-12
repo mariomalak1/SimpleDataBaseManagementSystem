@@ -10,15 +10,7 @@ private:
     BookPrimaryIndex * bookPrimaryIndex;
     BookSecondaryIndexAuthorIDs * bookSecondaryIndexAuthorIDs;
     BookDataFile bookData;
-public:
-    BookData(){
-        bookPrimaryIndex = new BookPrimaryIndex();
-        bookSecondaryIndexAuthorIDs = new BookSecondaryIndexAuthorIDs();
-    }
-
-    bool addBook(){
-        // get the data from the user
-        Book book = Book::getValidBookDataFromUser();
+    bool addBookDirectly(Book book){
         int bookOffset;
 
         // check that no id entered before as this id from index
@@ -52,6 +44,17 @@ public:
             bookPrimaryIndex->setFlagOff();
             return false;
         }
+    }
+public:
+    BookData(){
+        bookPrimaryIndex = new BookPrimaryIndex();
+        bookSecondaryIndexAuthorIDs = new BookSecondaryIndexAuthorIDs();
+    }
+
+    bool addBook(){
+        // get the data from the user
+        Book book = Book::getValidBookDataFromUser();
+        return addBookDirectly(book);
     }
 
     Book * searchWithISBN(string isbn, int &offset){
@@ -88,6 +91,34 @@ public:
 
     vector<Book> AllBooksWrittenByAuthor(string authorID){
         return bookSecondaryIndexAuthorIDs->search(authorID);
+    }
+
+    void updateBookTitle(){
+        cin.ignore();
+        string isbn;
+        cout << "Enter Book ISBN : ";
+        getline(cin, isbn);
+
+        int offset;
+        Book * book = searchWithISBN(isbn, offset);
+        if (book != nullptr){
+            // delete author first
+            if(deleteBook(book->getID())){
+                cout << "Enter New Title For Book : ";
+                string title;
+                getline(cin, title);
+                book->setBookTitle(const_cast<char *>(title.c_str()));
+
+                // add the author after edit the name
+                addBookDirectly(*book);
+                cout << "Book Updated Successfully" << endl;
+            }else{
+                cout << "Can't update Book." << endl;
+            }
+        }
+        else{
+            cout << "Book Not Found For Update." << endl;
+        }
     }
 };
 

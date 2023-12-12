@@ -54,6 +54,7 @@ private:
         }
         else if (response == "4"){
             // update book title with id
+            bookData->updateBookTitle();
         }
         else if (response == "5"){
             // delete book with id
