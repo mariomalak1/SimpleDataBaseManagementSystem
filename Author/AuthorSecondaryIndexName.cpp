@@ -37,7 +37,7 @@ private:
                 dataFile.close();
                 return;
             }
-            auto it = Names.find(author->getName());
+            auto it = Names.find(lowerCase(author->getName()));
             // check if the name is entered before
             if (it != Names.end()) {
                 // the name is found
@@ -47,7 +47,7 @@ private:
             else{
                 vector<string> IDs;
                 IDs.push_back(author->getID());
-                Names.insert(make_pair(author->getName(), IDs));
+                Names.insert(make_pair(lowerCase(author->getName()), IDs));
             }
 
             int recordLength = author->getLengthOfRecord();

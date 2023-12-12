@@ -233,20 +233,35 @@ private:
     }
 
     // to delete the remaining part after addition
-    static bool deletePart(fstream &file, int offset, int newAddedLength, int oldLength, bool &putInAvailList){
+    static bool deletePart(fstream &file, int offset, int newAddedLength, int oldLength, bool &putInAvailList, int &addedSpaces){
         if(file.is_open()){
-            // part len = old len - new len - (length indicator of new record)
-            int partLength = oldLength - newAddedLength - 2;
-
-            if (partLength >= Book::NORMAL_LENGTH){
-                putInAvailList = true;
-                return deleteBookFromFile(file, offset, partLength);
-            }
-            else{
+            if (oldLength == newAddedLength){
                 putInAvailList = false;
-                file.seekp(offset + newAddedLength + 2 , ios::beg);
-                file << "*|" << to_string(partLength) << "|";
                 return true;
+            }
+                // if the old >= new record length +  length indicator + length of (*|<0-9>)
+            else if (oldLength > newAddedLength + (2) + (3)){
+                // part len = old len - new len - (length indicator of new record)
+                int partLength = oldLength - newAddedLength - 2;
+
+                if (partLength > Book::NORMAL_LENGTH){
+                    putInAvailList = true;
+                    return deleteBookFromFile(file, offset, partLength);
+                }
+                else{
+                    putInAvailList = false;
+                    file.seekp(offset + newAddedLength + 2 , ios::beg);
+                    file << "*|" << to_string(partLength) << "|";
+                    return true;
+                }
+            }else{
+                int remainingPart = oldLength - (newAddedLength + 2);
+                file.seekp(offset + newAddedLength + 2 , ios::beg);
+                while (remainingPart > 0){
+                    file.put(' ');
+                    remainingPart--;
+                    addedSpaces++;
+                }
             }
         }
         else{
@@ -370,9 +385,21 @@ bool BookDataFile::addBook(Book &book, int &bookOffset) {
         }
         else{
             bool putInAvailList;
+            int addedSpaces = 0;
             // mark the remaining part as deleted
-            if (deletePart(file, suitableOffsetIfFound, book.getLengthOfRecord(), oldLength, putInAvailList)){
+            if (deletePart(file, suitableOffsetIfFound, book.getLengthOfRecord(), oldLength, putInAvailList, addedSpaces)){
                 if (!putInAvailList){
+                    if (addedSpaces){
+                        char title [book.getBookTitle().length() + addedSpaces + 1];
+                        strncpy(title, book.getBookTitle().c_str(), book.getBookTitle().length());
+                        title[book.getBookTitle().length() + addedSpaces] = '\0';
+                        int i = 1;
+                        while (addedSpaces > 0){
+                            title[book.getBookTitle().length() + i] = ' ';
+                            addedSpaces--;
+                        }
+                        book.setBookTitle(title);
+                    }
                     // change the pointer that point to this node to the next node
                     removeFromAvailList(file, suitableOffsetIfFound);
                 }

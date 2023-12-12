@@ -1,3 +1,9 @@
-not added in avail list in book  --- check the avail list at all in book
-when delete author, delete all books about him don't work -- see it
-test the hole project
+- make what change in change pointer in author in book also -- done
+- make what edited in author data file and edit it in book data file -- done
+
+- delete book
+- not added in avail list in book  --- check the avail list at all in book
+- delete all books from one author in the hole program
+- delete author that have book
+- delete author that have many books
+- test the hole project
